@@ -1,0 +1,205 @@
+#gamestart
+command /start:
+	permission: admin
+	trigger:
+		if {mv_bug_stop} is true:
+			send "&cゲームを開始できませんでした (mv bug stopper)" to ops
+			stop
+		set {game} to true
+		broadcast "&aゲームを開始します"
+		command "/gamemode 0 @a"
+		command "clear @a"
+		register_scoreborad()
+		glowing_block({map_setting::core::red}, "red")
+		glowing_block({map_setting::core::blue}, "blue")
+		random_team()
+		loop all players:
+			if {red::*} contain loop-player:
+				command "/teamjoin %loop-player% red"
+			if {blue::*} contain loop-player:
+				command "/teamjoin %loop-player% blue"
+		wait a tick
+		spawn_core()
+		bossbar_timer(60)
+
+on respawn:
+	wait a tick
+	command "/respawn %player%"
+
+command /respawn <player>:
+	trigger:
+		clear arg 1's inventory
+		command "/kit_item %arg 1% %{kit.%arg 1%}%"
+		if {kit.%arg 1%} is not set:
+			command "/kit_item %arg 1% knight"
+		if {red::*} contain arg 1:
+			teleport arg 1 to random location of {map_setting::spawn::red::*}
+		if {blue::*} contain arg 1:
+			teleport arg 1 to random location of {map_setting::spawn::blue::*}
+
+command /teamjoin <player> <text>:
+	trigger:
+		if arg 2 is "red":
+			command "/scoreboard teams join red %arg 1%"
+			set the arg 1's tablist name to "&c%arg 1%"
+			set arg 1's nametag to "&c%arg 1%"
+		if arg 2 is "blue":
+			command "/scoreboard teams join blue %arg 1%"
+			set the arg 1's tablist name to "&9%arg 1%"
+			set arg 1's nametag to "&9%arg 1%"
+		command "/respawn %arg 1%"
+		command "/getkit %arg 1%"
+		count_scoreboard(arg 1)
+
+function random_team():
+	set {_allplayers::*} to all players
+	set {join::*} to all players
+	loop size of {_allplayers::*} / 2 times:
+		set {_random_player} to random player of {_allplayers::*}
+		add {_random_player} to {red::*}
+		remove {_random_player} from {_allplayers::*}
+	set {blue::*} to {_allplayers::*}
+	broadcast "DEBUG %{red::*}%"
+	broadcast "DEBUG %{blue::*}%"
+
+function register_scoreborad():
+	command "/scoreboard teams add red"
+	command "/scoreboard teams option red color red"
+	command "/scoreboard teams option red friendlyfire false"
+	command "/scoreboard teams option red nametagVisibility hideForOtherTeams"
+	command "/scoreboard teams option red collisionRule pushOwnTeam"
+	command "/scoreboard teams option red seeFriendlyInvisibles true"
+	#blue
+	command "/scoreboard teams add blue"
+	command "/scoreboard teams option blue color blue"
+	command "/scoreboard teams option blue friendlyfire false"
+	command "/scoreboard teams option blue nametagVisibility hideForOtherTeams"
+	command "/scoreboard teams option blue collisionRule pushOwnTeam"
+	command "/scoreboard teams option blue seeFriendlyInvisibles true"
+
+#---Item---
+on rightclick holding nether star:
+	name of held item contain "Team Join"
+	command "/gamemode 0 %player%"
+	command "clear %player%"
+	set {_team} to auto_team_select()
+	if {_team} is "red":
+		command "/teamjoin %player% red"
+	if {_team} is "blue":
+		command "/teamjoin %player% blue"
+	add player to {join::*}
+
+on rightclick holding emerald:
+	name of held item contain "SHOP"
+	command "/kit_shop %player%"
+
+on rightclick holding chest:
+	name of held item contain "Select Kit"
+	command "/select_kit %player%"
+
+function timeup():
+	#レッドが勝っていたら
+	if {max_count_red} < {max_count_blue}:
+		#しかしブルーがコアを持っていたら延長戦
+		if {blue::*} contain {has_core}:
+			game_extension()
+		else:
+			win("red")
+		stop
+	#ブルーが勝っていたら
+	if {max_count_blue} < {max_count_red}:
+		#しかしレッドがコアを持っていたら延長戦
+		if {red::*} contain {has_core}:
+			game_extension()
+		else:
+			win("blue")
+	else:
+		game_extension()
+		stop
+	if {max_count_blue} = {max_count_red}:
+		broadcast "&6&l引き分け！！"
+		reset()
+		stop
+
+function game_extension():
+	send "extension" to ops
+	set {game_extension} to true
+	stop
+
+function win(color: text):
+	if {_color} is "red":
+		broadcast "Red teamの勝利"
+	if {_color} is "blue":
+		broadcast "Blue teamの勝利"
+	reset()
+
+command /stopgame:
+	trigger:
+		reset()
+
+function reset():
+	if {mv_bug_stop} is true:
+		send "&cゲームをリセットできませんでした (mv bug stopper)" to ops
+		stop
+	set {game} to false
+	set {ending} to false
+	set {game_extension} to false
+	set {already_first_get} to false
+	set {dropped_core} to true
+	loop all players:
+		teleport loop-player to {lobby}
+		set gamemode of loop-player to adventure
+		clear loop-player's inventory
+		heal loop-player
+		set food level of loop-player to 10
+		reset loop-player's tablist name
+		reset loop-player's nametag
+		set glowing of loop-player to false
+		set level of loop-player to 0
+		set level progress of loop-player to 0
+		give emerald named "&6SHOP" to loop-player
+		give chest named "&6Select Kit" to loop-player
+		wipe loop-player's sidebar
+	command "/effect @a clear"
+	delete {red::*}
+	delete {blue::*}
+	delete {join::*}
+	delete {max_count_blue}
+	delete {max_count_red}
+	command "/scoreboard teams remove red"
+	command "/scoreboard teams remove blue"
+	map_create()
+
+on join:
+	broadcast "&6%player% has join"
+	if {game} is true:
+		#add player to boss bar {bar}
+		if {join::*} contain player:
+			if {red::*} contain player:
+				send "&c試合に戻ります"
+				teleport player to {map_setting::spawn::red::1}
+				set the player's tablist name to "&c%player%"
+				set player's nametag to "&c%player%"
+			if {blue::*} contain player:
+				send "&c試合に戻ります"
+				teleport player to {map_setting::spawn::blue::1}
+				set the player's tablist name to "&9%player%"
+				set player's nametag to "&9%player%"
+		else:
+			wait 2 ticks
+			teleport player to {lobby}
+			set gamemode of player to adventure
+			clear player's inventory
+			give nether star named "&6Team join" to player
+	else:
+		wait 2 ticks
+		teleport player to {lobby}
+		set gamemode of player to adventure
+		clear player's inventory
+		if {game} is true:
+			give nether star named "&6Team Join" to player
+
+on quit:
+	if {has_core} is player:
+		remove all nether stars from player's inventory
+		spawn_core()

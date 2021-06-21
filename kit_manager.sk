@@ -1,0 +1,64 @@
+
+on script load:
+	delete {all_kits::*}
+	register_kit("knight", "Knight", "&6最強戦士", stone sword)
+	register_kit("archer", "Archer", "&3ボウスパムやめてください", bow)
+	register_kit("tank", "Tank", "&9堅い", diamond chestplate)
+
+options:
+	kit_cost: 300
+
+command /select_kit <player>:
+	trigger:
+		open chest with 6 row named "&6&lSelect Kit" to arg 1
+		set {_slot} to 0
+		loop {all_kits::*}:
+			if {has_kits.%arg 1%::*} contain loop-value:
+				set slot {_slot} of arg 1's current inventory to {kits::%loop-value%::icon} named "&6%{kits::%loop-value%::name}%" with lore {kits::%loop-value%::lore}
+				add 1 to {_slot}
+
+on inventory click:
+	name of player's current inventory contain "Select Kit"
+	cancel event
+	name of clicked item is set
+	clicked item is not air
+	set {kit.%player%} to {get_kits::%uncolored name of clicked item%}
+	if {join::*} contain player:
+		command "/kit_item %player% %{get_kits::%uncolored name of clicked item%}%"
+	else:
+		send "&6Select &a&l%uncolored name of clicked item%"
+	close player's inventory
+
+command /kit_shop <player>:
+	trigger:
+		open chest with 6 row named "&5&lKit SHOP" to arg 1
+		set {_slot} to 0
+		loop {all_kits::*}:
+			if {has_kits::*} doesn't have loop-value:
+				set slot {_slot} of arg 1's current inventory to {kits::%loop-value%::icon} named "&6%{kits::%loop-value%::name}%" with lore {kits::%loop-value%::lore}
+				add 1 to {_slot}
+
+on inventory click:
+	name of player's current inventory contain "Kit SHOP"
+	cancel event
+	name of clicked item is set
+	clicked item is not air
+	kit_buy(player, {get_kits::%uncolored name of clicked item%}, {@kit_cost})
+
+function kit_buy(p: player, kit: string, cost: number):
+	if {xp.%{_p}%} < {_const}:
+		send "&cXPが足りません" to {_p}
+		stop
+	if {has_kits.%{_p}%::*} contain {_kit}:
+		send "&c既に%{_kit}%&cは解放しています" to {_p}
+		stop
+	add {_kit} to {has_kits.%{_p}%::*}
+	send "&6%{_kit}%のスキルを開放しました！" to {_p}
+	stop
+
+function register_kit(kit: string, kit_name: string, description: string, icon: item type):
+	set {kits::%{_kit}%::name} to {_kit_name}
+	set {kits::%{_kit}%::lore} to colored {_description}
+	set {kits::%{_kit}%::icon} to {_icon}
+	set {get_kits::%{_kit_name}%} to {_kit}
+	add {_kit} to {all_kits::*}

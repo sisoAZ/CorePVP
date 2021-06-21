@@ -1,0 +1,1016 @@
+#Developed by しそ#1459
+
+command /settings [<text>] [<text>] [<text>] [<text>]:
+	trigger:
+		if arg 1 is not set:
+			send "&6/settings world setup (name)"
+			send "&6/settings world (red|blue) nexus"
+			send "&6/settings world (red|blue) spawn"
+			send "&6/settings world (red|blue) iron (area)"
+			send "&6/settings world (red|blue) gold (area)"
+			send "&6/settings world (red|blue) redstone (area)"
+			send "&6/settings world diamond (area)"
+			send "&6/settings nexuspermission (area)"
+			send "&6/settings allunlock (on|off)"
+			send "&6/settings mode (default|auto|short)"
+			stop
+		if arg 1 is "world":
+			if arg 2 is "setup":
+				if arg 3 is set:
+					if world_all_ok("%player's world%") is false:
+						send "&cレッドチーム、ブルーチームのネクサス、スポーン、マップのパーミッションエリアを設定してください"
+						stop
+					add "%player's world%" to {maplist::*}
+					set {mapname.%player's world%} to arg 3
+					execute player command "/mv modify set autoload true"
+					execute player command "/mv config autopurge false"
+					send "&a完了しました。 MAP名(%arg 3%)"
+					stop
+			if arg 2 is "diamond":
+				if arg 3 is set:
+					set {world_setting::%player's world%::diamond} to location of player
+					set {world_setting::%player's world%::diamond_area} to arg 3 parsed as number
+					send "&aSet diamond location %arg 2% %location of player% area %arg 3%"
+					stop
+			if arg 2 is "red" or "blue":
+				if arg 3 is "nexus":
+					set {world_setting::%player's world%::%arg 2%::nexus} to location of player
+					send "&aSet Nexus location %arg 2% %location of player%"
+					stop
+				if arg 3 is "spawn":
+					add location of player to {world_setting::%player's world%::%arg 2%::spawn::*}
+					send "&aSet spawn location %arg 2% %location of player%"
+					stop
+				if arg 3 is "iron":
+					if arg 4 is set:
+						set {world_setting::%player's world%::%arg 2%::iron} to location of player
+						set {world_setting::%player's world%::%arg 2%::iron_area} to arg 4 parsed as number
+						send "&aSet Iron location %arg 2% %location of player% area %arg 4%"
+						stop
+				if arg 3 is "gold":
+					if arg 4 is set:
+						set {world_setting::%player's world%::%arg 2%::gold} to location of player
+						set {world_setting::%player's world%::%arg 2%::gold_area} to arg 4 parsed as number
+						send "&aSet gold location %arg 2% %location of player% area %arg 4%"
+						stop
+				if arg 3 is "redstone":
+					if arg 4 is set:
+						set {world_setting::%player's world%::%arg 2%::redstone} to location of player
+						set {world_setting::%player's world%::%arg 2%::redstone_area} to arg 4 parsed as number
+						send "&aSet redstone location %arg 2% %location of player% area %arg 4%"
+						stop
+		if arg 1 is "nexuspermission":
+			set {world_setting::%player's world%::nexuspermission} to arg 2 parsed as number
+			send "&aSet permission area %arg 2%"
+			stop
+		if arg 1 is "allunlock":
+			if arg 2 is "on":
+				set {all_free_job} to true
+				send "&6全職開放をONにしました"
+			if arg 2 is "off":
+				set {all_free_job} to false
+				send "&6全職開放をOFFにしました"
+		if arg 1 is "mode":
+			if arg 2 is "default" or "short" or "auto":
+				set {mode} to arg 2
+				send "&6Set %arg 2% Mode"
+
+function world_all_ok(world: text) :: boolean:
+	if {world_setting::%{_world}%::red::nexus} is set:
+		if {world_setting::%{_world}%::blue::nexus} is set:
+			if {world_setting::%{_world}%::red::spawn::*} is set:
+				if {world_setting::%{_world}%::blue::spawn::*} is set:
+					return true
+	return false
+
+#gamestart
+command /start:
+	permission: admin
+	trigger:
+		if {mv_bug_stop} is true:
+			send "&cゲームを開始できませんでした (mv bug stopper)" to ops
+			stop
+		broadcast "&aゲームを開始します"
+		set {phase} to 1
+		broadcast "&6[&eAnni&6] 試合が開始されました"
+		command "/gamemode 0 @a"
+		command "clear @a"
+		loop all players:
+			if {red::*} contain loop-player:
+				set the loop-player's tablist name to "&7[&cR&7]&c%loop-player%"
+				set loop-player's nametag to "&7[&cR&7]&c%loop-player%"
+				equip(loop-player)
+				deathtp(loop-player)
+				command "/givejobitem %loop-player% %{job.%loop-player%}%"
+			if {blue::*} contain loop-player:
+				set the loop-player's tablist name to "&7[&9B&7]&9%loop-player%"
+				set loop-player's nametag to "&7[&9B&7]&9%loop-player%"
+				equip(loop-player)
+				deathtp(loop-player)
+				command "/givejobitem %loop-player% %{job.%loop-player%}%"
+			give nether star named "&aTeam join" to loop-player
+			give feather named "&6Job Select" to loop-player
+			sbr(loop-player)
+			set {job.%loop-player%} to "default"
+		if {mode} is "default":
+			set {mode_time} to 300
+			set {_global_hp} to 300
+		else if {mode} is "auto":
+			set {mode_time} to 300
+			set {_global_hp} to 200 + (30 * size of all players) #プレイヤー人数 * 10 + 50
+		else if {mode} is "short":
+			set {mode_time} to 120
+			set {_global_hp} to 30
+		else:
+			set {mode_time} to 300
+		set {phase_time} to floor(unix timestamp of now) + {mode_time}
+		bossbar({phase_time} - floor(unix timestamp of now), {phase})
+		kill all golems
+		set {_chunk} to chunk at {map_setting_nexus_red}
+		load chunk {_chunk}
+		spawn iron golem at {map_setting_nexus_red}
+		add "{NoAI:1}" to nbt of last spawned iron golem
+		set name of last spawned iron golem to "&c&lRed Nexus"
+		add "{CustomNameVisible:1}" to nbt of last spawned iron golem
+		set max health of last spawned iron golem to {_global_hp}
+		heal last spawned iron golem
+		set {redhp} to health of last spawned iron golem
+		set {_chunk} to chunk at {map_setting_nexus_blue}
+		load chunk {_chunk}
+		spawn iron golem at {map_setting_nexus_blue}
+		add "{NoAI:1}" to nbt of last spawned iron golem
+		set name of last spawned iron golem to "&9&lBlue Nexus"
+		add "{CustomNameVisible:1}" to nbt of last spawned iron golem
+		set max health of last spawned golem to {_global_hp}
+		heal last spawned iron golem
+		set {bluehp} to health of last spawned iron golem
+		set {game} to true
+		loop all players:
+			add loop-player to boss bar {bar}
+
+command /mob:
+	trigger:
+		spawn iron golem at {map_setting_nexus_red}
+		send "%location of last spawned iron golem% %last spawned iron golem%"
+		add "{NoAI:1}" to nbt of last spawned iron golem
+		set name of last spawned iron golem to "&aAAAAAAAAAAAA"
+
+#途中参加
+command /join:
+	trigger:
+		open chest with 1 row named "&6&lSelect team" to player
+		set slot 0 of player's current inventory to white wool named "Random"
+		set slot 1 of player's current inventory to red wool named "&cRed"
+		set slot 2 of player's current inventory to blue wool named "&9Blue"
+
+on inventory click:
+	name of player's current inventory contain "Select team"
+	clicked item is not air
+	cancel event
+	{join::*} do not contain player
+	if {game} is true:
+		{phase} is 1 or 2 or 3 or 4 or 5
+		set {_reds} to number of {red::*}
+		set {_blues} to number of {blue::*}
+		if {red::*} is not set:
+			set {_reds} to 0
+		if {blue::*} is not set:
+			set {_blues} to 0
+		if name of clicked item contain "Red":
+			if {rank.%player%} is true:
+				add player to {red::*}
+			else if {_reds} = {_blues}:
+				add player to {red::*}
+			else if {_reds} < {_blues}:
+				add player to {red::*}
+			else if {_reds} > {_blues}:
+				send "&c入れませんでした！"
+				stop
+		if name of clicked item contain "Blue":
+			if {rank.%player%} is true:
+				add player to {blue::*}
+			else if {_reds} = {_blues}:
+				add player to {blue::*}
+			else if {_reds} < {_blues}:
+				send "&c入れませんでした！"
+				stop
+			else if {_reds} > {_blues}:
+				add player to {blue::*}
+		if name of clicked item contain "Random":
+			if {_reds} = {_blues}:
+				set {_randomjoin} to random integer between 1 and 2
+				if {_randomjoin} is 1:
+					add player to {red::*}
+				else if {_randomjoin} is 2:
+					add player to {blue::*}
+			else if {_reds} < {_blues}:
+				add player to {red::*}
+			else if {_reds} > {_blues}:
+				add player to {blue::*}
+		add player to {join::*}
+		command "/gamemode 0 %player%"
+		command "clear %player%"
+		heal player
+		set food level of player to 10
+		sbr(player)
+		loop all players:
+			if {red::*} contain loop-player:
+				set the loop-player's tablist name to "&7[&cR&7]&c%loop-player%"
+				set loop-player's nametag to "&7[&cR&7]&c%loop-player%"
+			if {blue::*} contain loop-player:
+				set the loop-player's tablist name to "&7[&9B&7]&9%loop-player%"
+				set loop-player's nametag to "&7[&9B&7]&9%loop-player%"
+		wait 1 tick
+		equip(player)
+		deathtp(player)
+		command "/givejobitem %player% %{job.%player%}%"
+		add player to boss bar {bar}
+	else:
+		if {blue::*} and {red::*} is not set:
+			if name of clicked item contain "Red":
+				add player to {red::*}
+			if name of clicked item contain "Blue":
+				add player to {blue::*}
+		set {_reds} to number of {red::*}
+		set {_blues} to number of {blue::*}
+		if name of clicked item contain "Red":
+			if {_reds} = {_blues}:
+				add player to {red::*}
+			else if {_reds} < {_blues}:
+				add player to {red::*}
+			else if {_reds} > {_blues}:
+				send "&c入れませんでした！"
+				stop
+		if name of clicked item contain "Blue":
+			if {_reds} = {_blues}:
+				add player to {blue::*}
+			else if {_reds} < {_blues}:
+				send "&c入れませんでした！"
+				stop
+			else if {_reds} > {_blues}:
+				add player to {blue::*}
+		if name of clicked item contain "Random":
+			set {_randomjoin} to random integer between 1 and 2
+			if {_randomjoin} is 1:
+				add player to {red::*}
+			else if {_randomjoin} is 2:
+				add player to {blue::*}
+		add player to {join::*}
+		if {join::*} >= {min_players_start}:
+			command "/start"
+			stop
+
+on rightclick holding nether star:
+	name of held item contain "Team join"
+	execute player command "/join"
+
+on rightclick holding feather:
+	name of held item contain "Job Select"
+	job_select(player)
+
+on rightclick holding emerald:
+	name of held item contain "SHOP"
+	execute player command "/jobshop"
+
+#チャット処理
+on chat:
+	if {red::*} contain player:
+		set chat format to "&7[&cR&7]: &f%message%"
+	if {blue::*} contain player:
+		set chat format to "&7[&9B&7]: &f%message%"
+
+function deathtp(p: player):
+	set {_random_spawn} to random integer between 1 and 3
+	if {red::*} contain {_p}:
+		teleport {_p} to {map_setting_spawn_red::%{_random_spawn}%}
+		if helmet of {_p} is air:
+			set {_item} to leather helmet
+			dye {_item} red
+			set helmet of {_p} to {_item} named "&cRedArmor" with lore "&6Soulbound"
+		if chestplate of {_p} is air:
+			set {_item} to leather chestplate
+			dye {_item} red
+			set chestplate of {_p} to {_item} named "&cRedArmor" with lore "&6Soulbound"
+		if leggings of {_p} is air:
+			set {_item} to leather leggings
+			dye {_item} red
+			set leggings of {_p} to {_item} named "&cRedArmor" with lore "&6Soulbound"
+		if boots of {_p} is air:
+			set {_item} to leather boots
+			dye {_item} red
+			set boots of {_p} to {_item} named "&cRedArmor" with lore "&6Soulbound"
+	if {blue::*} contain {_p}:
+		teleport {_p} to {map_setting_spawn_blue::%{_random_spawn}%}
+		if helmet of {_p} is air:
+			set {_item} to leather helmet
+			dye {_item} blue
+			set helmet of {_p} to {_item} named "&bBlueArmor" with lore "&6Soulbound"
+		if chestplate of {_p} is air:
+			set {_item} to leather chestplate
+			dye {_item} blue
+			set chestplate of {_p} to {_item} named "&bBlueArmor" with lore "&6Soulbound"
+		if leggings of {_p} is air:
+			set {_item} to leather leggings
+			dye {_item} blue
+			set leggings of {_p} to {_item} named "&bBlueArmor" with lore "&6Soulbound"
+		if boots of {_p} is air:
+			set {_item} to leather boots
+			dye {_item} blue
+			set boots of {_p} to {_item} named "&bBlueArmor" with lore "&6Soulbound"
+	if {_p} do not have sword:
+		give wooden sword with lore "&6Soulbound" to {_p}
+
+
+function sbr(p: player):
+	if {game} is true:
+		wipe {_p}'s sidebar
+		set name of sidebar of {_p} to "&6&lMap: %{mapname.%{last_map}%}%"
+		set score "&cRed Nexus:" in sidebar of {_p} to {redhp}
+		set score "&9Blue Nexus:" in sidebar of {_p} to {bluehp}
+	else:
+		wipe {_p}'s sidebar
+		set name of sidebar of {_p} to "&6&lOVERDOSE"
+		set score "" in sidebar of {_p} to 1
+		set score "Lv: &b&l%{lv.%{_p}%}%" in sidebar of {_p} to 2
+		set score "XP: &a&l%{xp.%{_p}%}%" in sidebar of {_p} to 3
+		set score "Kills: &c&l%{kill.%{_p}%}%" in sidebar of {_p} to 4
+		set score "&b===Your Status===" in sidebar of {_p} to 5
+
+#倒されたときの処理
+on death of player:
+	if {game} is true:
+		if {blue::*} contain victim:
+			if attacker is set:
+				broadcast "&b%victim%(%{job.%victim%}%) &7was killed by &c%attacker%(%{job.%attacker%}%)"
+			add 5 to {xp.%attacker%}
+			add 5 to {allxp.%attacker%}
+			send "&a+5XP" to attacker
+			if {phase} is 5:
+				send "&aPhase5Bonus +5xp"
+			wait 5 tick
+		if {red::*} contain victim:
+			if attacker is set:
+				broadcast "&c%victim%(%{job.%victim%}%) &7was killed by &b%attacker%(%{job.%attacker%}%)"
+			add 5 to {xp.%attacker%}
+			add 5 to {allxp.%attacker%}
+			send "&a+5XP" to attacker
+			if {phase} is 5:
+				send "&aPhase5Bonus +5xp"
+		set {godmode.%player%} to true #無敵時間
+		wait 3 seconds
+		set {godmode.%player%} to false #無敵時間解除
+		#deathtpは下のイベントで実行 (force respawnも)
+
+#drop
+on death of player:
+	{game} is true
+	if {red::*} contain player:
+		if distance between location of player and {map_setting_iron_red} <= {map_setting_iron_area_red}:
+			send "ok distanc" to victim
+			if player has iron ingot:
+				send "iron has" to victim
+				drop amount of iron ingot of player's inventory / 2 of iron ingot at location of player without velocity
+				remove amount of iron ingot of player's inventory / 2 of iron ingot from player's inventory
+		if distance between location of player and {map_setting_gold_red} <= {map_setting_gold_area_red}:
+			if player has gold ingot:
+				drop amount of gold ingot of player's inventory / 2 of gold ingot at location of player without velocity
+				remove amount of gold ingot of player's inventory / 2 of gold ingot from player's inventory
+		if distance between location of player and {map_setting_redstone_red} <= {map_setting_redstone_area_red}:
+			if player has redstone:
+				drop amount of redstone of player's inventory / 2 of redstone at location of player without velocity
+				remove amount of redstone of player's inventory / 2 of redstone from player's inventory
+	if {blue::*} contain player:
+		if distance between location of player and {map_setting_iron_blue} <= {map_setting_iron_area_blue}:
+			if player has iron ingot:
+				drop amount of iron ingot of player's inventory / 2 of iron ingot at location of player without velocity
+				remove amount of iron ingot of player's inventory / 2 of iron ingot from player's inventory
+		if distance between location of player and {map_setting_gold_blue} <= {map_setting_gold_area_blue}:
+			if player has gold ingot:
+				drop amount of gold ingot of player's inventory / 2 of gold ingot at location of player without velocity
+				remove amount of gold ingot of player's inventory / 2 of gold ingot from player's inventory
+		if distance between location of player and {map_setting_redstone_blue} <= {map_setting_redstone_area_blue}:
+			if player has redstone:
+				drop amount of redstone of player's inventory / 2 of redstone at location of player without velocity
+				remove amount of redstone of player's inventory / 2 of redstone from player's inventory
+	if distance between location of player and {map_setting_diamond} <= {map_setting_diamond_area}:
+		if player has diamond:
+			drop amount of redstone of player's inventory of redstone at location of player without velocity
+			remove amount of redstone of player's inventory of redstone from player's inventory
+	#防具と剣、弓をロストさせる
+	if helmet of player is not leather helmet:
+		drop helmet of player at location of player without velocity
+		clear helmet of player
+	if chestplate of player is not leather chestplate:
+		drop chestplate of player at location of player without velocity
+		clear chestplate of player
+	if leggings of player is not leather leggings:
+		drop leggings of player at location of player without velocity
+		clear leggings of player
+	if boots of player is not leather boots:
+		drop boots of player at location of player without velocity
+		clear boots of player
+	if player has sword:
+		loop all items in player's inventory:
+			if loop-item is sword:
+				if lore of loop-item do not contain "Soulbound":
+					drop loop-item at location of player without velocity
+					remove loop-item from player's inventory
+	if player has sword:
+		loop all items in player's inventory:
+			if loop-item is bow:
+				if lore of loop-item do not contain "Soulbound":
+					drop loop-item at location of player without velocity
+					remove loop-item from player's inventory
+	if player has pickaxe:
+		loop all items in player's inventory:
+			if loop-item is pickaxe:
+				if lore of loop-item do not contain "Soulbound":
+					chance of 50%: #50%の確率でピッケルを落とす
+						drop loop-item at location of player without velocity
+						remove loop-item from player's inventory
+	remove level of player / 2 from level of player
+	wait 5 tick
+	force respawn player
+	deathtp(victim)
+
+#プレイヤーのダメージ処理
+on damage of player:
+	if {jac.%victim%} is true:
+		stop
+	if {game} is true:
+		if {godmode.%victim%} is true: #無敵状態だったら
+			cancel event
+			stop
+		if {red::*} contain attacker:
+			if {red::*} contain victim:
+				cancel event
+		if {blue::*} contain attacker:
+			if {blue::*} contain victim:
+				cancel event
+	else:
+		cancel event
+
+#ゴーレムが叩かれたら
+on damage of iron golem:
+	{game} is true
+	if {phase} is 1:
+		send "&cPhase1のため攻撃できません。" to attacker
+		cancel event
+	if {ending} is true:
+		cancel event
+		stop
+	{phase} >= 2
+	if {phase} is 2:
+		set damage to damage * 0.9
+	#p3は1倍
+	if {phase} is 4:
+		set damage to damage * 1.1
+	if {phase} is 5:
+		set damage to damage * 1.5
+	if name of victim contain "Blue Nexus":
+		if {blue::*} contain attacker:
+			send "&c自軍のネクサスには攻撃できません" to attacker
+			cancel event
+			stop
+		if {red::*} contain attacker:
+			set {bluehp} to health of victim
+			loop all players:
+				sbr(loop-player)
+				if {red::*} contain loop-player:
+					add 3 to {xp.%loop-player%}
+					add 3 to {allxp.%loop-player%}
+					send "&a+3xp" to loop-player
+					if distance between location of loop-player and {map_setting_nexus_blue} <= {map_setting_nexus_area} + 30:
+						sound("entity.irongolem.hurt", loop-player)
+				else if {blue::*} contain loop-player:
+					if distance between location of loop-player and {map_setting_nexus_blue} >= {map_setting_nexus_area} + 30:
+						play sound "block.note.harp" with volume 1 and pitch 2 at loop-player for loop-player
+					else:
+						sound("entity.irongolem.hurt", loop-player)
+	if name of victim contain "Red Nexus":
+		if {red::*} contain attacker:
+			send "&c自軍のネクサスには攻撃できません" to attacker
+			cancel event
+			stop
+		if {blue::*} contain attacker:
+			set {redhp} to health of victim
+			loop all players:
+				sbr(loop-player)
+				if {blue::*} contain loop-player:
+					add 3 to {xp.%loop-player%}
+					add 5 to {allxp.%loop-player%}
+					send "&a+3xp" to loop-player
+					if distance between location of loop-player and {map_setting_nexus_red} <= {map_setting_nexus_area} + 30:
+						sound("entity.irongolem.hurt", loop-player)
+				else if {red::*} contain loop-player:
+					if distance between location of loop-player and {map_setting_nexus_red} >= {map_setting_nexus_area} + 30:
+						play sound "block.note.harp" with volume 1 and pitch 2 at loop-player for loop-player
+					else:
+						sound("entity.irongolem.hurt", loop-player)
+
+#ジャンプパッド
+on step on pressure plate:
+	if event-block is redstone block or lapis block or iron block:
+		push player forwards at speed 3
+		push player upwards at speed 1
+		sound_location("ENTITY_WITHER_SHOOT", location of player, 2)
+		set {lunchpad.%player%} to true
+		wait 5 seconds
+		set {lunchpad.%player%} to false
+
+on damage of player:
+	if damage cause is fall:
+		if {launchpad.%victim%} is true:
+			cancel event
+
+function map_create():
+	if {maplist::*} is not set:
+		send "&cError MAP is not set" to ops
+		stop
+	set {mv_bug_stop} to true #不具合が起きないようにフラグを設定
+	command "mv delete anni_map"
+	wait 1 seconds
+	command "mv confirm"
+	wait 2 seconds
+	if size of {maplist::*} <= 1:
+		set {_new_map} to {maplist::1}
+	else:
+		while {_new_map} is not set:
+			wait 10 tick
+			set {_random_map} to random string of {maplist::*}
+			if {_random_map} is not {last_map}: #前やったMAPと同じだったら
+				set {_new_map} to {_random_map}
+			else if {last_map} is not set:
+				set {_new_map} to {_random_map}
+	command "mv clone %{_new_map}% anni_map"
+	#ワールドが違うのでワールド名だけを変えてlocationを移行
+	set {_map_setting_nexus_red} to move_location_world({world_setting::%{_new_map}%::red::nexus}, "anni_map")
+	set {_map_setting_nexus_blue} to move_location_world({world_setting::%{_new_map}%::blue::nexus}, "anni_map")
+	set {_map_setting_iron_red} to move_location_world({world_setting::%{_new_map}%::red::iron}, "anni_map")
+	set {_map_setting_iron_blue} to move_location_world({world_setting::%{_new_map}%::blue::iron}, "anni_map")
+	set {_map_setting_gold_red} to move_location_world({world_setting::%{_new_map}%::red::gold}, "anni_map")
+	set {_map_setting_gold_blue} to move_location_world({world_setting::%{_new_map}%::blue::gold}, "anni_map")
+	set {_map_setting_redstone_red} to move_location_world({world_setting::%{_new_map}%::red::redstone}, "anni_map")
+	set {_map_setting_redstone_blue} to move_location_world({world_setting::%{_new_map}%::blue::redstone}, "anni_map")
+	set {_map_setting_diamond} to move_location_world({world_setting::%{_new_map}%::diamond}, "anni_map")
+
+	set {map_setting_nexus_red} to {_map_setting_nexus_red}
+	set {map_setting_nexus_blue} to {_map_setting_nexus_blue}
+	set {map_setting_iron_red} to {_map_setting_iron_red}
+	set {map_setting_iron_blue} to {_map_setting_iron_blue}
+	set {map_setting_gold_red} to {_map_setting_gold_red}
+	set {map_setting_gold_blue} to {_map_setting_gold_blue}
+	set {map_setting_redstone_red} to {_map_setting_redstone_red}
+	set {map_setting_redstone_blue} to {_map_setting_redstone_blue}
+	set {map_setting_diamond} to {_map_setting_diamond}
+	set {map_setting_iron_area_red} to {world_setting::%{_new_map}%::red::iron_area}
+	set {map_setting_iron_area_blue} to {world_setting::%{_new_map}%::blue::iron_area}
+	set {map_setting_gold_area_red} to {world_setting::%{_new_map}%::red::gold_area}
+	set {map_setting_gold_area_blue} to {world_setting::%{_new_map}%::blue::gold_area}
+	set {map_setting_redstone_area_red} to {world_setting::%{_new_map}%::red::redstone_area}
+	set {map_setting_redstone_area_blue} to {world_setting::%{_new_map}%::blue::redstone_area}
+	set {map_setting_diamond_area} to {world_setting::%{_new_map}%::diamond_area}
+	set {map_setting_nexus_area} to {world_setting::%{_new_map}%::nexuspermission}
+	loop 3 times:
+		set {map_setting_spawn_red::%loop-number%} to move_location_world({world_setting::%{_new_map}%::red::spawn::%loop-number%}, "anni_map")
+		set {map_setting_spawn_blue::%loop-number%} to move_location_world({world_setting::%{_new_map}%::blue::spawn::%loop-number%}, "anni_map")
+	set {last_map} to {_new_map}
+	broadcast "success %{_new_map}%"
+	set {mv_bug_stop} to false
+
+function move_location_world(old_location: location, map: text) :: location:
+	try:
+		return location({_old_location}'s x-location, {_old_location}'s y-location, {_old_location}'s z-location, {_map} parsed as world, yaw of {_old_location},  pitch of {_old_location})
+	catch in {_e}:
+		broadcast "&cロケーション移植エラー: &4%{_e}%"
+
+#Game End
+on death of golem:
+	attacker is set
+	set {ending} to true
+	if name of victim contain "Blue Nexus":
+		send all players title "&cRed Team Win!!" for 5 seconds
+		set {bluehp} to 0
+		loop {red::*}:
+			add 50 to {xp.%loop-value%}
+			add 50 to {allxp.%loop-value%}
+			send "&a+50xp" to loop-value
+	if name of victim contain "Red Nexus":
+		send all players title "&9Blue Team Win!!" for 5 seconds
+		set {redhp} to 0
+		loop {blue::*}:
+			add 50 to {xp.%loop-value%}
+			add 50 to {allxp.%loop-value%}
+			send "&a+50xp" to loop-value
+	loop all players:
+		sbr(loop-player)
+	sound("entity.enderdragon.death", all players, 0.8)
+	broadcast "&630秒後にゲームが終了します"
+	wait 10 seconds #仮
+	reset()
+
+#reset
+function reset():
+	if {mv_bug_stop} is true:
+		send "&cゲームをリセットできませんでした (mv bug stopper)" to ops
+		stop
+	set {phase} to 0
+	set {game} to false
+	set {ending} to false
+	loop all players:
+		teleport loop-player to {lobby}
+		set gamemode of loop-value to adventure
+		clear loop-player's inventory
+		heal loop-player
+		set food level of loop-player to 10
+		set loop-player's tablist name to "&f%loop-player%"
+		reset loop-player's nametag
+		set level of loop-player to 0
+		set level progress of loop-player to 0
+		sbr(loop-player)
+		give emerald named "&6SHOP" to loop-player
+		if {bar} is set:
+			remove loop-player from bossbar {bar}
+	command "/effect @a clear"
+	delete {red::*}
+	delete {blue::*}
+	delete {join::*}
+	map_create()
+
+#Server join & start & stop
+on Skript start:
+	if {server} is false:
+		set {server} to true
+		set {restart} to true
+	set {phase} to "idle"
+	set {phasecount} to "idle"
+	set {bluecount} to 0
+	set {redcount} to 0
+	set {game} to false
+	delete {red::*}
+	delete {blue::*}
+	delete {join::*}
+	delete {bar}
+	set {mv_bug_stop} to false #バグストッパー解除
+	reset()
+	recipe_register()
+
+on first join:
+	wait 2 tick
+	teleport player to {jac_join_location} #hack check
+	set gamemode of player to adventure
+	#ステータス設定
+	set {xp.%player%} to 0
+	set {allxp.%player%} to 0
+	set {first_join.%player%} to floor(unix timestamp of now)
+	set {kill.%player%} to 0
+	set {nexus.%player%} to 0
+	wait 1 tick
+	set gamemode of player to adventure
+
+on join:
+	broadcast "&6%player% has join"
+	if {game} is true:
+		add player to boss bar {bar}
+		if {join::*} contain player:
+			if {red::*} contain player:
+				send "&c試合に戻ります"
+				teleport player to {map_setting_spawn_red::1}
+				set the player's tablist name to "&7[&cR&7]&c%player%"
+				set player's nametag to "&7[&cR&7]&c%player%"
+			if {blue::*} contain player:
+				send "&c試合に戻ります"
+				teleport player to {map_setting_spawn_blue::1}
+				set the player's tablist name to "&7[&9B&7]&9%player%"
+				set player's nametag to "&7[&9B&7]&9%player%"
+		else:
+			teleport player to {lobby}
+			set gamemode of player to adventure
+			sbr(player)
+			give nether star named "&6Team join" to player
+	else:
+		teleport player to {lobby}
+		set gamemode of player to adventure
+		clear player's inventory
+		sbr(player)
+		if {game} is true:
+			give nether star named "&6Team join" to player
+
+#ボスバー
+function bossbar(time: number, phase: number):
+	if {bar} is not set:
+		set {bar} to new bossbar
+		set color of bossbar {bar} to pink
+		set style of bossbar {bar} to solid
+	if {_phase} >= 5:
+		set skellett progress of bossbar {bar} to 1
+		set string of bossbar {bar} to "Phase: %{_phase}%"
+		stop
+	set skellett progress of bossbar {bar} to {_time} / {mode_time}
+	if {_time} >= 60:
+		if mod({_time}, 60) >= 10:
+			set string of bossbar {bar} to "Phase: %{_phase}% - %floor({_time} / 60)%:%mod({_time}, 60)%"
+		else:
+			set string of bossbar {bar} to "Phase: %{_phase}% - %floor({_time} / 60)%:0%mod({_time}, 60)%"
+	else if {_time} >= 10:
+		set string of bossbar {bar} to "Phase: %{_phase}% - 0:%{_time}%"
+	else:
+		set string of bossbar {bar} to "Phase: %{_phase}% - 0:0%{_time}%"
+
+every seconds: #毎秒処理する部分を書く
+	if {game} is true:
+		bossbar({phase_time} - floor(unix timestamp of now), {phase})
+		if {phase_time} <= floor(unix timestamp of now):
+			setphase({phase} + 1)
+
+function setphase(phase: number):
+	set {phase} to {_phase}
+	broadcast "&6&lPhase %{phase}%"
+	if {phase} is 5:
+		set {phase_time} to false
+	else:
+		set {phase_time} to floor(unix timestamp of now) + {mode_time}
+
+#soulboundのアイテムを落とせないよう
+on drop:
+	lore of event-item contains "&6Soulbound"
+	delete event-entity
+	sound_location("entity.item.break", location of player, 2)
+
+#エンちゃんと台などの調整
+#Enchant table
+on inventory open:
+	if name of event-inventory is "Enchant":
+		set slot 1 of event-inventory to 64 lapis lazulis
+
+on inventory click:
+	if name of event-inventory is "Enchant":
+		if clicked slot is 1:
+			cancel event
+
+on inventory close:
+	if name of event-inventory is "Enchant":
+		set slot 1 of event-inventory to air
+
+on enchant:
+	wait 1 tick
+	if enchant level <= 10:
+		add 1 to level of player
+	if enchant level <= 20:
+		add 2 to level of player
+	if enchant level <= 30:
+		add 3 to level of player
+	remove enchant level from level of player
+
+#醸造大
+on inventory open:
+	if name of event-inventory is "container.brewing":
+		set slot 4 of event-inventory to 64 blaze powder
+
+on inventory click:
+	if name of event-inventory is "container.brewing":
+		if clicked slot is 4:
+			cancel event
+#壊したときブレイズパウダーが出るので対策
+on break:
+	"%event-block%" is "BREWING_STAND"
+	set slot 4 of event-block's inventory to air
+
+#alchemist
+on inventory click:
+	#{job.%player%} is "alchemist"
+	inventory type of event-inventory is "BREWING"
+	send "%clicked slot%"
+	if clicked slot is 3:
+		wait 1 tick
+		if slot 3 of event-inventory is not air:
+			slot 0 or 1 or 2 of event-inventory is not air
+			set {_inv} to event-inventory
+			set {_holder} to method "getHolder" from event-inventory
+			set {_block} to method "getBlock" from {_holder}
+			set block at {brew_loc} to {_block}
+			wait 1 tick
+			add "{BrewTime:200s}" to nbt of {_block}
+
+#ブロックの復活の処理＆経験値＆幸運
+on place of cobblestone:
+	{game} is true
+	cancel event
+
+on break of cobblestone:
+	{game} is true
+	cancel event
+
+#パーミッション
+on break:
+	gamemode of player is not creative
+	event-block is not end stone
+	event-block is not melon block
+	event-block is not log
+	#ブロックを壊した地点とno breakのエリアの距離が{no_break_area}以内だったら
+	if distance between event-location and {map_setting_nexus_red} <= {map_setting_nexus_area}:#unko
+		send "&cネクサス近くは壊せません"
+		cancel event
+	if distance between event-location and {map_setting_nexus_blue} <= {map_setting_nexus_area}:
+		send "&cネクサス近くは壊せません"
+		cancel event
+
+on place:
+	gamemode of player is not creative
+	event-block is not end stone
+	#ブロックを壊した地点とno breakのエリアの距離が{no_break_area}以内だったら
+	if distance between event-location and {map_setting_nexus_red} <= {map_setting_nexus_area}:
+		send "&cネクサス近くにブロックは置けません"
+		cancel event
+	if distance between event-location and {map_setting_nexus_blue} <= {map_setting_nexus_area}:
+		send "&cネクサス近くにブロックは置けません"
+		cancel event
+
+#鉱石類
+#原木
+on break of log:
+	{game} is true
+	cancel event
+	set event-block to air
+	give 4 of oak planks to player
+	add 2 to xp of player
+	wait 10 seconds
+	set event-block to log
+
+#スイカ
+on break of melon block:
+	{game} is true
+	cancel event
+	set event-block to air
+	give 10 of melon slices to player
+	add 1 to xp of player
+	wait 10 seconds
+	set event-block to melon block
+#鉱石類
+on mine of coal ore:
+	{game} is true
+	cancel event
+	set event-block to cobblestone
+	if "%enchantments of held item%" contain "Fortune":
+		give level of fortune of the player's tool + 1 of coal to player
+	else:
+		give coal to player
+	add 6 to xp of player
+	wait 10 seconds
+	set event-block to coal ore
+#鉄
+on mine of iron ore:
+	{game} is true
+	cancel event
+	set event-block to cobblestone
+	give iron ingot to player
+	add 9 to xp of player
+	wait 10 seconds
+	set event-block to iron ore
+#ラピス
+on mine of lapis ore:
+	{game} is true
+	cancel event
+	set event-block to cobblestone
+	give 4 of lapis to player
+	add 9 to xp of player
+	wait 10 seconds
+	set event-block to lapis ore
+#金
+on mine of gold ore:
+	{game} is true
+	cancel event
+	set event-block to cobblestone
+	give gold ingot to player
+	add 11 to xp of player
+	wait 10 seconds
+	set event-block to gold ore
+#レッドストーン
+on mine:
+	"%event-block%" is "GLOWING_REDSTONE_ORE"
+	{game} is true
+	cancel event
+	set event-block to cobblestone
+	give 6 of redstone to player
+	add 10 to xp of player
+	wait 10 seconds
+	set event-block to redstone ore
+#ダイア
+on mine of diamond ore:
+	{game} is true
+	cancel event
+	if {phase} <= 2:
+		send "&cPhase3移行に掘れるようになります"
+		stop
+	set event-block to cobblestone
+	if "%enchantments of held item%" contain "Fortune":
+		give level of fortune of the player's tool + 1 of diamond to player
+	else:
+		give diamond to player
+	add 22 to xp of player
+	wait 10 seconds
+	set event-block to diamond ore
+
+#エメラルド
+on mine of emerald ore:
+	{game} is true
+	cancel event
+	set event-block to cobblestone
+	give emerald to player
+	add 18 to xp of player
+	wait 10 seconds
+	set event-block to emerald ore
+
+#mine処理のなんか
+on break of iron ore or gold ore or lapis ore or redstone ore or diamond ore or emerald ore:
+	{game} is true
+	cancel event
+
+on break:
+	"%event-block%" is "GLOWING_REDSTONE_ORE"
+	{game} is true
+	cancel event
+
+#砂利の処理
+on break of gravel:
+	{game} is true
+	cancel event
+	set event-block to cobblestone
+	set {_number} to random integer between 2 and 4
+	give {_number} of arrow to player
+	chance of 20%:
+		give string to player
+	add 1 to xp of player
+	wait 10 seconds
+	set event-block to gravel
+
+#畑
+on break:
+	"%event-block%" is "CROPS"
+	if data of event-block is 7:
+		set {_loc} to location of event-block
+		set event-block to type of event-block
+		chance of 1%:
+			drop apple
+		chance of 5%:
+			drop nether wart item
+		chance of 10%:
+			drop experience bottle
+		wait 1 tick
+		loop 7 times:
+			wait 1 seconds
+			set data of block at {_loc} to loop-number
+	else:
+		cancel event
+
+#Custom Recipe Register
+function recipe_register():
+	register new shapeless recipe for blaze powder using redstone block, ghast tear, lapis block, air, air, air, air, air, air
+
+#醸造台の素材
+function shop_brewing(p: player):
+	open chest with 2 row named "&eBrewing SHOP" to {_p}
+	set slot 0 of {_p}'s current inventory to brewing stand named "&ePrivate Brewing Stand" with lore "&6Gold: 10"
+	set slot 1 of {_p}'s current inventory to 3 bottle named "&eBottle" with lore "&6Gold: 1"
+	set slot 2 of {_p}'s current inventory to nether wart item named "&eNether wart" with lore "&6Gold: 5"
+	set slot 3 of {_p}'s current inventory to redstone named "&eRedstone" with lore "&6Gold: 3"
+	set slot 4 of {_p}'s current inventory to gunpowder named "&eGunPowder" with lore "&6Gold: 5"
+	set slot 5 of {_p}'s current inventory to fermented spider eye named "&eFermented spider eye" with lore "&6Gold: 2"
+	set slot 6 of {_p}'s current inventory to magma cream named "&eMagma cream" with lore "&6Gold: 2"
+	set slot 7 of {_p}'s current inventory to sugar named "&eSugar" with lore "&6Gold: 2"
+	set slot 8 of {_p}'s current inventory to spider eye named "&eSpider eye" with lore "&6Gold: 2"
+	set slot 9 of {_p}'s current inventory to golden carrot named "&eGold currot" with lore "&6Gold: 2"
+	set slot 10 of {_p}'s current inventory to gold melon named "&eGold melon" with lore "&6Gold: 2"
+	set slot 11 of {_p}'s current inventory to ghast tear named "&eGhast tear" with lore "&6Gold: 15"
+	if {phase} >= 4:
+		set slot 12 of {_p}'s current inventory to blaze powder named "&eBlaze Powder" with lore "&6Gold: 40"
+
+on inventory click:
+	name of player's current inventory contain "Brewing SHOP"
+	clicked item is not air
+	cancel event
+	set {_split_gold::*} to line 1 of lore of clicked item split at "&6Gold: "
+	set {_gold} to {_split_gold::2} parsed as number
+	if number of all gold ingot in player's inventory < {_gold}:
+		send "&cGoldが足りません"
+		stop
+	set {_item} to clicked item
+	clear lore of {_item}
+	give {_item} to player
+	remove {_gold} of gold ingot from player's inventory
+	stop
+
+#素材購入
+on rightclick:
+	block is a sign
+	line 2 of clicked block contain "Brewing SHOP"
+	shop_brewing(player)
+
+command /kill:
+	trigger:
+		kill player
+
+command /ea <text>:
+	permission: siso
+	trigger:
+		evaluate arg 1

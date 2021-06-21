@@ -1,0 +1,7 @@
+command /ea <text>:
+    trigger:
+        evaluate arg 1
+
+command /getalltypes:
+    trigger:
+        stop

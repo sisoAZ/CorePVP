@@ -1,0 +1,64 @@
+#Developed by しそ#1459
+
+command /settings [<text>] [<text>] [<text>] [<text>]:
+	trigger:
+		if arg 1 is not set:
+			send "&6/settings world setup (map name)"
+			send "&6/settings world (red|blue) spawn"
+			send "&6/settings world spawn_core"
+			send "&6/settings world (red|blue) core"
+			send "&6/settings permission_area (area)"
+			send "&6/settings allunlock (on|off)"
+			stop
+		if arg 1 is "world":
+			if arg 2 is "setup":
+				if arg 3 is set:
+					if world_all_ok("%player's world%") is false:
+						send "&cレッドチーム、ブルーチームのネクサス、スポーン、マップのパーミッションエリアを設定してください"
+						stop
+					add "%player's world%" to {maplist::*}
+					set {mapname.%player's world%} to arg 3
+					execute player command "/mv modify set autoload true"
+					execute player command "/mv modify monsters false"
+					execute player command "/mv config autopurge false"
+					send "&a完了しました。 MAP名(%arg 3%)"
+					stop
+				else:
+					send "&cMAP名を入力してください"
+					stop
+			if arg 2 is "spawn_core":
+				set {world_setting::%player's world%::spawn_core} to location of player
+				send "&aSet Spawn core location %location of player%"
+				stop
+			if arg 2 is "red" or "blue":
+				if arg 3 is "core":
+					set {world_setting::%player's world%::%arg 2%::core} to location of target block
+					send "&aSet Core location %arg 2% %location of target block%"
+					stop
+				if arg 3 is "spawn":
+					add location of player to {world_setting::%player's world%::%arg 2%::spawn::*}
+					send "&aSet spawn location %arg 2% %location of player%"
+					stop
+		if arg 1 is "permission_area":
+			set {world_setting::%player's world%::permission_area} to arg 2 parsed as number
+			send "&aSet permission area %arg 2%"
+			stop
+		if arg 1 is "allunlock":
+			if arg 2 is "on":
+				set {all_free_job} to true
+				send "&6全職開放をONにしました"
+			if arg 2 is "off":
+				set {all_free_job} to false
+				send "&6全職開放をOFFにしました"
+		if arg 1 is "mode":
+			if arg 2 is "default" or "short" or "auto":
+				set {mode} to arg 2
+				send "&6Set %arg 2% Mode"
+
+function world_all_ok(world: text) :: boolean:
+	if {world_setting::%{_world}%::red::core} is set:
+		if {world_setting::%{_world}%::blue::core} is set:
+			if {world_setting::%{_world}%::red::spawn::*} is set:
+				if {world_setting::%{_world}%::blue::spawn::*} is set:
+					return true
+	return false

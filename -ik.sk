@@ -1,0 +1,615 @@
+options:
+	job_price: 300 #jobの価格
+ 
+#未購入のjob名は&c
+#購入済みのjob名は&a　AND　loreにUnlockedと書く
+ 
+command /jobshop:
+	trigger:
+		open chest with 3 row named "&6Job SHOP" to player
+		set slot 0 of player's current inventory to experience bottle named "&6Enchanter"
+		set slot 1 of player's current inventory to brick block named "&6Builder"
+		if {buy_job.%player%.enchanter} is true:
+			set slot 0 of player's current inventory to stone pickaxe named "&6Enchanter" with lore "&aUnlocked"
+		if {buy_job.%player%.builder} is true:
+			set slot 1 of player's current inventory to brick block named "&6Builder" with lore "&aUnlocked"
+		#上をまねる
+ 
+#ここは弄らなくてもOK
+on inventory click:
+	name of player's current inventory contain "Job SHOP"
+	clicked item is set
+	cancel event
+	if lore of clicked item contain "Unlocked": #loreにunlockedという文字が含まれていたら
+		stop #何もしない
+	if {xp.%player%} is not set: #XPの変数がセットされてなかったら
+		set {xp.%player%} to 0 #XPの変数を0にセットする
+	#購入処理
+	#クリックしたアイテム、色なしの小文字のjob名を入れる (変数用) uncolored、色なし in lower case、全部小文字にする
+	set {_job_name_lower} to uncolored name of clicked item in lower case
+	#クリックしたアイテムの名前 #(broadcast用)
+	set {_job_name_normal} to name of clicked item
+	if {xp.%player%} < {@job_price}:
+		send "&c%{@job_price} - {xp.%player%}%XP足りません！"
+		stop
+	set {buy_job.%player%.%{_job_name_lower}%} to true
+	remove {@job_price} from {xp.%player%}
+	broadcast "&e%player%&aさんが&6%{_job_name_normal}%&aを開放しました！"
+	#共通処理
+	close player's inventory
+	execute player command "/jobshop"
+ 
+#職業チェンジのポータル
+on portal:
+	"%event-teleport cause%" is "nether portal" #ネザーかの判定
+	player's world is "anni_map"
+	cancel event
+	if {red::*} contain player:
+		teleport player to {map_setting_spawn_red::1}
+	if {blue::*} contain player:
+		teleport player to {map_setting_spawn_blue::1}
+	wait 10 tick
+	job_select(player)
+
+function job_select(p: player):
+	open chest with 3 row named "&6&lSelect Job" to {_p}
+	set slot 0 of {_p}'s current inventory to stone pickaxe named "&6Miner"
+	set slot 1 of {_p}'s current inventory to stone sword named "&6Attacker"
+	set slot 2 of {_p}'s current inventory to apple named "&6Healer"
+	set slot 3 of {_p}'s current inventory to iron chestplate named "&6Defender"
+	set slot 4 of {_p}'s current inventory to experience bottle named "&6Enchanter"
+	set slot 5 of {_p}'s current inventory to brick block named "&6Builder"
+	set slot 6 of {_p}'s current inventory to blaze rod named "&6RiftWalker"
+	set slot 7 of {_p}'s current inventory to fishing rod named "&6Scout"
+	set slot 8 of {_p}'s current inventory to nether quartz named "&6Tranporter"
+ 
+#何もしなくてOK
+#職業選択
+on inventory click:
+	name of player's current inventory contain "Select Job"
+	clicked item is set
+	cancel event
+	if {join::*} do not contain player:
+		set {job.%player%} to uncolored name of clicked item in lower case
+		close player's inventory
+		send "&6Set job %name of clicked item%"
+		stop
+	if {all_free_job} is true: #もし全職業開放をtrueにしてたら
+		command "/givejobitem %player% %uncolored name of clicked item in lower case%"
+		close player's inventory
+		stop
+	if name of clicked item contain "Civilian" or "Miner" or "Attacker" or "Healer": #もしシビリアンかマイナーを選んだら
+		command "/givejobitem %player% %uncolored name of clicked item in lower case%"
+		close player's inventory
+		stop
+	if {buy_job.%player%.%uncolored name of clicked item in lower case%} is not true: #クリックした名前の職業を持ってなかったら
+		send "&cその職業はjob shopから購入することで使用できます"
+		stop #何もしない
+	command "/givejobitem %player% %uncolored name of clicked item in lower case%"
+	#引数はアイテムの名前 in lower caseは全部小文字にするやつ uncoloredは色消す奴 /givejobitem siso_AZ &6Civilianとかになるから
+	close player's inventory
+ 
+#職業ごとにアイテムを
+command /givejobitem [<player>] [<text>]:
+	permission: admin
+	trigger:
+		set {job.%arg 1%} to arg-2
+		remove_job_item(arg 1)
+		remove_active(arg 1)
+		#Kit Item
+		if {job.%arg 1%} is set:
+			delete {skill_active.%arg 1%.%{job.%arg 1%}%}
+			if {job.%arg 1%} is "miner":
+				give arg-1 gold nugget named "&6Mining Boost" with lore "&6Skill item"
+				give arg-1 stone pickaxe of Efficiency 1 named "&6Miner Pickaxe" with lore "&6Class item"
+			if {job.%arg 1%} is "attacker":
+				give arg-1 magma cream named "&6Attack Boost" with lore "&6Skill item"
+			if {job.%arg 1%} is "healer":
+				give arg-1 paper named "&6Heal Boost" with lore "&6Skill item"
+			if {job.%arg 1%} is "defender":
+				give arg-1 lime dye named "&6Nexus Warp" with lore "&6Skill item"
+			if {job.%arg 1%} is "enchanter":
+				give arg-1 experience bottle named "&6Level Boost" with lore "&6Skill item"
+			if {job.%arg 1%} is "builder":
+				give arg-1 book named "&6Blocks" with lore "&6Skill item"
+			if {job.%arg 1%} is "riftwalker":
+				give arg-1 blaze rod named "&6Rift" with lore "&6Skill item"
+			if {job.%arg 1%} is "scout":
+				give arg-1 fishing rod named "&6Grapple" with lore "&6Class item"
+			if {job.%arg 1%} is "tranporter":
+				give arg-1 nether quartz named "&6Portal Marker" with lore "&6Class item"
+			
+ 
+#職業固有のアイテムを消去
+function remove_job_item(p: player):
+	loop all items in {_p}'s inventory:
+		if lore of loop-item contain "&6Skill item" or "&6Class item":
+			remove loop-item from {_p}'s inventory
+
+#ここからKitの効果とか
+options:
+	#Kit item cooltime
+	miner: 60
+	attacker: 40
+	healer: 20
+	defender: 20
+	enchanter: 60
+	builder: 70
+	riftwalker: 10
+	scout: 0
+	tranporter: 0
+
+#CoolTime
+every seconds:
+	loop all players:
+		if {cooltime.%loop-player%.%{job.%loop-player%}%} = 0:
+			set {cooltime.%loop-player%.%{job.%loop-player%}%} to -1
+		if {cooltime.%loop-player%.%{job.%loop-player%}%} > 0:
+			remove 1 from {cooltime.%loop-player%.%{job.%loop-player%}%}
+			if {cooltime.%loop-player%.%{job.%loop-player%}%} = 0:
+				send action bar "&a&lReady" to loop-player
+				stop
+			send action bar "&6&l%{cooltime.%loop-player%.%{job.%loop-player%}%}%" to loop-player
+
+#skill Active Time
+function active(p: player, time: number):
+	set {skill_active.%{_p}%.%{job.%{_p}%}%} to true
+	send "active" to {_p}
+	wait "%{_time}% seconds" parsed as timespan
+	set {skill_active.%{_p}%.%{job.%{_p}%}%} to false
+	send "unactive" to {_p}
+
+function remove_active(p: player):
+	set {attack_boost.%{_p}%} to false
+	set {mining_boost.%{_p}%} to false
+	set {enchant_boost.%{_p}%} to false
+	if {portal.%{_p}%.1} or {portal.%{_p}%.2} is set:
+		set block at {portal.%{_p}%.1} to {portal_block.%{_p}%.1}
+		set block at {portal.%{_p}%.2} to {portal_block.%{_p}%.2}
+		delete {portal.%{_p}%.1}
+		delete {portal.%{_p}%.2}
+		send "&cDestory portal" to {_p}
+
+#Miner
+on mine:
+	{job.%player%} is "miner"
+	if event-block is iron ore or gold ore:
+		chance of 80%:
+			if event-block is iron ore:
+				give iron ingot to player
+			if event-block is gold ore:
+				give gold ingot to player
+
+on rightclick holding gold nugget:
+	{job.%player%} is "miner"
+	name of held item contain "Mining Boost"
+	if {cooltime.%player%.%{job.%player%}%} > 0:
+		stop
+	set {cooltime.%player%.%{job.%player%}%} to {@miner}
+	#ここからコード
+	loop all players in radius 5 around player:
+		set {mining_boost.%loop-player%} to true
+		wait 30 seconds
+		set {mining_boost.%loop-player%} to false
+
+on mine:
+	if {mining_boost.%player%} is true:
+		if event-block is iron ore:
+			give 2 iron ingot to player
+		if event-block is gold ore:
+			give 2 iron ingot to player
+
+#Attacker
+on damage of player:
+	if {attack_boost.%attacker%} is true:
+		set damage to damage * 1.2
+	if {job.%attacker%} is "attacker":
+		set damage to damage * 1.1
+
+on rightclick holding magma cream:
+	{job.%player%} is "attacker"
+	name of held item contain "Attack Boost"
+	if {cooltime.%player%.%{job.%player%}%} > 0:
+		stop
+	set {cooltime.%player%.%{job.%player%}%} to {@attacker}
+	#ここからコード
+	loop all players in radius 5 around player:
+		if {red::*} contain player:
+			set {attack_boost.%loop-player%} to true
+			wait 5 seconds
+			set {attack_boost.%loop-player%} to false
+		if {blue::*} contain player:
+			set {attack_boost.%loop-player%} to true
+			wait 5 seconds
+			set {attack_boost.%loop-player%} to false
+		
+
+#Healer
+on damage of player:
+	if {job.%victim%} is "healer":
+		attacker is a player
+		loop all players in radius 10 around victim:
+			loop-player is not victim #ループされたプレイヤーは自分自身じゃない
+			if {red::*} contain victim:
+				add damage to health of loop-player
+			if {blue::*} contain victim:
+				add damage to health of loop-player
+
+on death of player:
+	if {job.%victim%} is "healer":
+		attacker is a player
+		loop all players in radius 10 around victim:
+			loop-player is not victim
+			if {red::*} contain victim:
+				heal loop-player
+				add 10 to food level of loop-player
+				apply absorption of tier 1 to loop-player for 10 seconds
+				send "&a&l%victim%'s lief" to loop-player
+			if {blue::*} contain victim:
+				heal loop-player
+				add 10 to food level of loop-player
+				apply absorption of tier 1 to loop-player for 10 seconds
+				send "&a&l%victim%'s lief" to loop-player
+
+on rightclick holding paper:
+	{job.%player%} is "healer"
+	name of held item contain "Heal Boost"
+	if {cooltime.%player%.%{job.%player%}%} > 0:
+		stop
+	set {cooltime.%player%.%{job.%player%}%} to {@healer}
+	#ここからコード
+	loop all players in radius 10 around player:
+		if {red::*} contain player:
+			add 3 to health of loop-player
+			send "&aHealed by %player%" to loop-player
+		if {blue::*} contain player:
+			add 3 to health of loop-player
+			send "&aHealed by %player%" to loop-player
+
+#defender
+on damage of iron golem:
+	{phase} >= 2
+	if name of victim contain "Red Nexus":
+		if {blue::*} contain attacker:
+			loop all players in radius 3 around attacker:
+				if {red::*} contain loop-player:
+					if {job.%loop-player%} is "defender":
+						apply resistance of tier 1 to loop-player for 2 seconds
+	if name of victim contain "Blue Nexus":
+		if {red::*} contain attacker:
+			loop all players in radius 3 around attacker:
+				if {blue::*} contain loop-player:
+					if {job.%loop-player%} is "defender":
+						apply resistance of tier 1 to loop-player for 2 seconds
+
+on rightclick:
+	"%held item%" contain "lime dye"
+	name of held item contain "Nexus Warp"
+	if {cooltime.%player%.%{job.%player%}%} > 0:
+		stop
+	if {red::*} contain player:
+		if distance between location of player and {map_setting_nexus_red} <= {map_setting_permission_area} + 40:
+			teleport player to location at location 1 backwards {map_setting_nexus_red}
+			set {cooltime.%player%.%{job.%player%}%} to {@defender}
+		else:
+			send "&cネクサスまでの距離が遠すぎます！"
+	if {blue::*} contain player:
+		if distance between location of player and {map_setting_nexus_blue} <= {map_setting_permission_area} + 40:
+			teleport player to location at location 1 backwards {map_setting_nexus_blue}
+			set {cooltime.%player%.%{job.%player%}%} to {@defender}
+		else:
+			send "&cネクサスまでの距離が遠すぎます！"
+
+#Enchanter
+on rightclick holding experience bottle:
+	name of held item contain "Level Boost"
+	cancel event
+	if {cooltime.%player%.%{job.%player%}%} > 0:
+		stop
+	set {cooltime.%player%.%{job.%player%}%} to {@enchanter}
+	loop all players in radius 5 around player:
+		set {enchant_boost.%loop-player%} to true
+		wait 30 seconds
+		set {enchant_boost.%loop-player%} to false
+
+on mine:
+	{enchant_boost.%player%} is true
+	if event-block is coal ore:
+		if {skill_active.%player%.%{job.%player%}%} is true:
+			add 6 * 3 to xp of player
+		else:
+			add 6 to xp of player
+	if event-block is iron ore:
+		if {skill_active.%player%.%{job.%player%}%} is true:
+			add 9 * 3 to xp of player
+		else:
+			add 9 to xp of player
+	if event-block is lapis ore:
+		if {skill_active.%player%.%{job.%player%}%} is true:
+			add 9 * 3 to xp of player
+		else:
+			add 9 to xp of player
+	if event-block is gold ore:
+		if {skill_active.%player%.%{job.%player%}%} is true:
+			add 11 * 3 to xp of player
+		else:
+			add 11 to xp of player
+	if "%event-block%" is "GLOWING_REDSTONE_ORE":
+		if {skill_active.%player%.%{job.%player%}%} is true:
+			add 10 * 3 to xp of player
+		else:
+			add 10 to xp of player
+	if event-block is diamond ore:
+		if {skill_active.%player%.%{job.%player%}%} is true:
+			add 22 * 3 to xp of player
+		else:
+			add 22 to xp of player
+	if event-block is emerald ore:
+		if {skill_active.%player%.%{job.%player%}%} is true:
+			add 18 * 3 to xp of player
+		else:
+			add 18 to xp of player
+
+#Builder
+on rightclick holding book:
+	name of held item contain "Blocks"
+	if {cooltime.%player%.%{job.%player%}%} > 0:
+		stop
+	set {cooltime.%player%.%{job.%player%}%} to {@builder}
+	#ここからコード
+	open chest with 3 row named "&6Blocks" to player
+	set slot random integer between 0 and 26 of player's current inventory to 32 oak planks
+	set slot random integer between 0 and 26 of player's current inventory to 64 brick block
+	set slot random integer between 0 and 26 of player's current inventory to 45 stone
+	chance of 50%:
+		set slot random integer between 0 and 26 of player's current inventory to 45 dirt
+	chance of 60%:
+		set slot random integer between 0 and 26 of player's current inventory to 30 wool
+
+#RiftWalker
+on rightclick holding blaze rod:
+	name of held item contain "Rift"
+	if {cooltime.%player%.%{job.%player%}%} > 0:
+		stop
+	#ここからコード
+	open chest with 3 row named "&6Select teleport player" to player
+	set {_slot_num} to 0
+	if {red::*} contain player:
+		loop {red::*}:
+			set slot {_slot_num} of player's current inventory to skull from skin of loop-value with owner "%loop-value%" named "&b%loop-value%" with lore "&6Distance: %distance between location of player and location of loop-value%"
+	if {blue::*} contain player:
+		loop {blue::*}:
+			set slot {_slot_num} of player's current inventory to skull from skin of loop-value with owner "%loop-value%" named "&b%loop-value%" with lore "&6Distance: %distance between location of player and location of loop-value%"
+	add 1 to {_slot_num}
+
+on inventory click:
+	name of player's current inventory contain "Select teleport player"
+	clicked item is not air
+	clicked slot is not -999
+	cancel event
+	if {cooltime.%player%.%{job.%player%}%} > 0:
+		stop
+	set {cooltime.%player%.%{job.%player%}%} to {@riftwalker}
+	set {_teleport_player} to uncolored name of clicked item parsed as player
+	if {red::*} contain player:
+		loop {red::*}:
+			if loop-value is {_teleport_player}:
+				send "&6%player%があなたにRiftWalkerのスキルを使用しました、10秒後にプレイヤーがテレポートされます" to loop-value
+				continue
+			send "&6%player%がRiftの準備をしました、10秒後にスニークしているプレイヤーは&b%uncolored name of clicked item%&6にTPされます" to loop-value
+			wait 5 seconds
+			apply glowing of tier 1 to {_teleport_player} for 5 seconds
+			send "&6%player%のRiftまで残り5秒" to loop-value
+			wait 1 seconds
+			send "&6%player%のRiftまで残り4秒" to loop-value
+			wait 1 seconds
+			send "&6%player%のRiftまで残り3秒" to loop-value
+			wait 1 seconds
+			send "&6%player%のRiftまで残り2秒" to loop-value
+			wait 1 seconds
+			send "&6%player%のRiftまで残り1秒" to loop-value
+			wait 1 seconds
+			if {job.%player%} is "riftwalker":
+				loop all players:
+					if {red::*} contain loop-player:
+						if loop-player is sneaking:
+							teleport loop-player to {_teleport_player}
+							send "&aTeleport Success" to loop-player
+			else:
+				kick the player due to "&6BAN"
+				ban player
+	if {blue::*} contain player:
+		loop {blue::*}:
+			if loop-value is {_teleport_player}:
+				send "&6%player%があなたにRiftWalkerのスキルを使用しました、10秒後にプレイヤーがテレポートされます" to loop-value
+				continue
+			send "&6%player%がRiftの準備をしました、10秒後にスニークしているプレイヤーは&b%uncolored name of clicked item%&6にTPされます" to loop-value
+			wait 5 seconds
+			apply glowing of tier 1 to {_teleport_player} for 5 seconds
+			send "&6%player%のRiftまで残り5秒" to loop-value
+			wait 1 seconds
+			send "&6%player%のRiftまで残り4秒" to loop-value
+			wait 1 seconds
+			send "&6%player%のRiftまで残り3秒" to loop-value
+			wait 1 seconds
+			send "&6%player%のRiftまで残り2秒" to loop-value
+			wait 1 seconds
+			send "&6%player%のRiftまで残り1秒" to loop-value
+			wait 1 seconds
+			if {job.%player%} is "riftwalker":
+				loop all players:
+					if {blue::*} contain loop-player:
+						if loop-player is sneaking:
+							teleport loop-player to {_teleport_player}
+							send "&aTeleport Success" to loop-player
+			else:
+				kick the player due to "&6BAN"
+				ban player
+
+#scout
+options:
+	UPWARD_VELOCITY: 0.02
+	VELOCITY_COEFFICIENT: 3.5
+	
+on fish:
+	if {job.%player%} is "scout":
+		if "%fishing state%" is "IN_GROUND":
+			push player upwards at speed {@UPWARD_VELOCITY}
+			push player (direction from location of player to location of fishing hook) at speed (distance between fishing hook and player) / {@VELOCITY_COEFFICIENT}
+
+on damage of player:
+	if {job.%victim%} is "scout":
+		damage cause is fall:
+			set damage to damage / 2
+
+#Transporter
+on rightclick holding nether quartz:
+	name of held item contain "Portal Marker"
+	send "%clicked block%"
+	if clicked block is set:
+		if {portal.%player%.2} is set: #二つ目のポータルが設置されていたら
+			send "2 is set %{portal.%player%.2}%"
+			set {_target_block} to clicked block
+			set block at {portal.%player%.1} to {portal_block.%player%.1}
+			set block at {portal.%player%.2} to {portal_block.%player%.2}
+			delete {portal.%player%.2}
+			delete {portal.%player%.1}
+			set {portal.%player%.1} to location of {_target_block}
+			set {portal_block.%player%.1} to type of {_target_block}
+			set block at location of {_target_block} to quartz ore
+			send "&cDestory portal"
+			stop
+		if {portal.%player%.1} is set: #もし一つ目のポータルが設置されていたら
+			send "1 is set %{portal.%player%.1}%"
+			set {_target_block} to clicked block
+			set {portal.%player%.2} to location of {_target_block}
+			set {portal_block.%player%.2} to type of {_target_block}
+			set block at location of {_target_block} to quartz ore
+			stop
+		if {portal.%player%.1} is not set: #一つ目のポータルが設置されてなかったら
+			send "not set"
+			set {_target_block} to clicked block
+			set {portal.%player%.1} to location of {_target_block}
+			set {portal_block.%player%.1} to type of {_target_block}
+			set block at location of {_target_block} to quartz ore
+			stop
+	else if clicked block is not set:
+		set block at {portal.%player%.1} to {portal_block.%player%.1}
+		set block at {portal.%player%.2} to {portal_block.%player%.2}
+		delete {portal.%player%.1}
+		delete {portal.%player%.2}
+		send "&cDestory portal"
+		stop
+
+on leftclick holding nether quartz:
+	name of held item contain "Portal Marker"
+	if {portal.%player%.1} or {portal.%player%.2} is set:
+		set block at {portal.%player%.1} to {portal_block.%player%.1}
+		set block at {portal.%player%.2} to {portal_block.%player%.2}
+		delete {portal.%player%.1}
+		delete {portal.%player%.2}
+		send "&cDestory portal"
+		stop
+
+on toggle sneak:
+	if block Below player is nether quartz ore:
+		if {duplication_portal.%player%} is not set:
+			set {duplication_portal.%player%} to false
+		if {duplication_portal.%player%} is false: #バグ修正のための変数
+			if {red::*} contain player:
+				loop {red::*}:
+					if {portal.%loop-value%.1} is location of block below player: #一つ目のポータルにスニークしてたら
+						if {portal.%loop-value%.2} is set:
+							teleport player to location 1 upwards {portal.%loop-value%.2}
+							set {duplication_portal.%player%} to true
+							wait 2 seconds
+							set {duplication_portal.%player%} to false
+							stop
+					if {portal.%loop-value%.2} is location of block below player: #2つ目のポータルにスニークしてたら
+						if {portal.%loop-value%.1} is set:
+							teleport player to location 1 upwards {portal.%loop-value%.1}
+							set {duplication_portal.%player%} to true
+							wait 2 seconds
+							set {duplication_portal.%player%} to false
+							stop
+			if {blue::*} contain player:
+				loop {blue::*}:
+					if {portal.%loop-value%.1} is location of block below player: #一つ目のポータルにスニークしてたら
+						if {portal.%loop-value%.2} is set:
+							teleport player to {portal.%loop-value%.2}
+							set {duplication_portal.%player%} to true
+							wait 2 seconds
+							set {duplication_portal.%player%} to false
+							stop
+					if {portal.%loop-value%.2} is location of block below player: #2つ目のポータルにスニークしてたら
+						if {portal.%loop-value%.1} is set:
+							teleport player to {portal.%loop-value%.1}
+							set {duplication_portal.%player%} to true
+							wait 2 seconds
+							set {duplication_portal.%player%} to false
+							stop
+
+on rightclick on nether quartz ore:
+	if {red::*} contain player:
+		loop {blue::*}:
+			if {portal.%loop-value%.1} or {portal.%loop-value%.2} is set:
+				set block at {portal.%loop-value%.1} to {portal_block.%loop-value%.1}
+				set block at {portal.%loop-value%.2} to {portal_block.%loop-value%.2}
+				delete {portal.%loop-value%.1}
+				delete {portal.%loop-value%.2}
+				send "&cDestory portal" to loop-value
+				stop
+	if {blue::*} contain player:
+		loop {red::*}:
+			if {portal.%loop-value%.1} or {portal.%loop-value%.2} is set:
+				set block at {portal.%loop-value%.1} to {portal_block.%loop-value%.1}
+				set block at {portal.%loop-value%.2} to {portal_block.%loop-value%.2}
+				delete {portal.%loop-value%.1}
+				delete {portal.%loop-value%.2}
+				send "&cDestory portal" to loop-value
+				stop
+
+on break of nether quartz ore:
+	loop all players:
+		if location of event-block is {portal.%loop-player%.1} or {portal.%loop-player%.2}:
+			cancel event
+
+function sound(sound: text, p: players, pitch: number = 1):
+	loop {_p::*}:
+		play sound {_sound} with volume 1 and pitch {_pitch} at loop-value for loop-value
+
+function sound_location(sound: text, loc: location, pitch: number = 1):
+	play sound {_sound} with volume 1 and pitch {_pitch} at {_loc}
+
+#装備
+function equip(p: player):
+	if {red::*} contain {_p}:
+		set {_item} to leather helmet
+		dye {_item} red
+		set helmet of {_p} to {_item} named "&cRedArmor" with lore "&6Soulbound"
+		set {_item} to leather chestplate
+		dye {_item} red
+		set chestplate of {_p} to {_item} named "&cRedArmor" with lore "&6Soulbound"
+		set {_item} to leather leggings
+		dye {_item} red
+		set leggings of {_p} to {_item} named "&cRedArmor" with lore "&6Soulbound"
+		set {_item} to leather boots
+		dye {_item} red
+		set boots of {_p} to {_item} named "&cRedArmor" with lore "&6Soulbound"
+	if {blue::*} contain {_p}:
+		set {_item} to leather helmet
+		dye {_item} blue
+		set helmet of {_p} to {_item} named "&bBlueArmor" with lore "&6Soulbound"
+		set {_item} to leather chestplate
+		dye {_item} blue
+		set chestplate of {_p} to {_item} named "&bBlueArmor" with lore "&6Soulbound"
+		set {_item} to leather leggings
+		dye {_item} blue
+		set leggings of {_p} to {_item} named "&bBlueArmor" with lore "&6Soulbound"
+		set {_item} to leather boots
+		dye {_item} blue
+		set boots of {_p} to {_item} named "&bBlueArmor" with lore "&6Soulbound"
+	give {_p} wooden sword named "&6Wooden Sword" with lore "&6Soulbound"
+	give {_p} stone pickaxe named "&6Stone Pickaxe" with lore "&6Soulbound"
+	give {_p} stone axe named "&6Stone Axe" with lore "&6Soulbound"
+	give {_p} stone shovel named "&6Stone Shovel" with lore "&6Soulbound"

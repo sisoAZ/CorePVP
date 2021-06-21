@@ -1,0 +1,35 @@
+function map_create():
+	if {maplist::*} is not set:
+		send "&cError MAP is not set" to ops
+		stop
+	set {mv_bug_stop} to true #不具合が起きないようにフラグを設定
+	command "mv delete game"
+	wait 1 seconds
+	command "mv confirm"
+	wait 2 seconds
+	if size of {maplist::*} <= 1:
+		set {_new_map} to {maplist::1}
+	else:
+		while {_new_map} is not set:
+			wait 10 tick
+			set {_random_map} to random string of {maplist::*}
+			if {_random_map} is not {last_map}: #前やったMAPと同じだったら
+				set {_new_map} to {_random_map}
+			else if {last_map} is not set:
+				set {_new_map} to {_random_map}
+	command "mv clone %{_new_map}% game"
+    #ワールドが違うのでワールド名だけを変えてlocationを移行
+	set {map_setting::spawn_core} to move_location_world({world_setting::%{_new_map}%::spawn_core}, "game")
+	set {map_setting::core::red} to move_location_world({world_setting::%{_new_map}%::red::core}, "game")
+	set {map_setting::core::blue} to move_location_world({world_setting::%{_new_map}%::blue::core}, "game")
+	loop size of {world_setting::%{_new_map}%::red::spawn::*} times:
+		set {map_setting::spawn::red::%loop-number%} to move_location_world({world_setting::%{_new_map}%::red::spawn::%loop-number%}, "game")
+		set {map_setting::spawn::blue::%loop-number%} to move_location_world({world_setting::%{_new_map}%::blue::spawn::%loop-number%}, "game")
+
+	set {last_map} to {_new_map}
+	broadcast "success %{_new_map}%"
+	set {mv_bug_stop} to false
+
+function move_location_world(old_location: location, map: text) :: location:
+	try:
+		return location({_old_location}'s x-location, {_old_location}'s y-location, {_old_location}'s z-location, {_map} parsed as world, yaw of {_old_location},  pitch of {_old_location})

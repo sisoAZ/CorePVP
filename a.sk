@@ -1,0 +1,152 @@
+on pick up of nether star:
+	send "Pick up ne" to player
+	set {dropped_core} to false
+	set glowing of player to true
+	#apply weakness of tier 1 without particles to player for 30 minutes
+	set the player's walk speed to 0.15
+	set {has_core} to player
+	if {already_first_get} is not true:
+		set {already_first_get} to true
+		if {red::*} contain {has_core}:
+			set {count_lead} to "red"
+		if {blue::*} contain {has_core}:
+			set {count_lead} to "blue"
+	if {max_count_red} is not set:
+		set {max_count_red} to 100
+	if {max_count_blue} is not set:
+		set {max_count_blue} to 100
+	count_detection(player)
+
+on inventory click:
+	clicked item is nether star
+	cancel event
+
+on death of player:
+	if player has nether star:
+		set {dropped_core} to true
+		delete {has_core}
+		reset_core()
+		wait 1 tick
+		drop nether star at location of player without velocity
+		loop dropped items in radius 5 of location of player:
+			if "%item of loop-value%" contain "nether star":
+				set glowing of loop-value to true
+		#延長だったら
+		if {game_extension} is true:
+			#ゴールまでたどり着かず倒された場合
+			if {red::*} contain {has_core}:
+				win("blue")
+			if {blue::*} contain {has_core}:
+				win("win")
+
+on respawn:
+	set glowing of player to false
+	remove weakness from player
+	remove all nether stars from player's inventory
+	reset player's walk speed
+	stop
+
+on walking on emerald block:
+	{ending} is not true
+	if location of block is {map_setting::core::red}:
+		send "true"
+		if player has nether star:
+			send "has core"
+			if {blue::*} contain player:
+				send "Contain BLUE"
+				win("blue")
+		else:
+			send "not has core"
+	if location of block is {map_setting::core::blue}:
+		send "true"
+		if player has nether star:
+			send "has core"
+			if {red::*} contain player:
+				send "Contain red"
+				win("red")
+		else:
+			send "not has core"
+
+function spawn_core():
+	drop nether star at {map_setting::spawn_core} without velocity
+	set glowing of last dropped item to true
+
+function reset_core():
+	set {_reset_time} to 0
+	while {dropped_core} is true:
+		wait 1 second
+		add 1 to {_reset_time}
+		if {_reset_time} >= 10:
+			loop dropped items:
+				if "%item of loop-value%" contain "nether star":
+					clear loop-value
+			spawn_core()
+			exit loop
+
+on drop of nether star:
+	cancel event
+
+function glowing_block(loc: location, color: text = "white"):
+	spawn shulker at {_loc}
+	apply invisibility 1 without particles to last spawned entity for 10 minutes
+	apply resistance 5 without particles to last spawned entity for 10 minutes
+	set glowing of last spawned entity to true
+	add "{NoAI:1}" to nbt of last spawned entity
+	add "{Invulnerable:1}" to nbt of last spawned entity
+	if {_color} is "red":
+		command "/scoreboard teams join red %uuid of last spawned shulker%"
+	if {_color} is "blue":
+		command "/scoreboard teams join blue %uuid of last spawned shulker%"
+
+command /forever:
+	trigger:
+		loop blocks within {tes1} and {tes2}:
+			if loop-block is not air:
+				glowing_block(location of loop-block)
+
+function count_detection(p: player):
+	if {red::*} contain {_p}:
+		set {_goal_distance} to distance between {map_setting::spawn_core} and {map_setting::core::blue}
+		set {_goal_location} to {map_setting::core::blue}
+		while {dropped_core} is not true:
+			set {_distance} to round(distance between {_goal_location} and location of {_p} / {_goal_distance} * 100)
+			if {_distance} > 100:
+				wait 1 seconds
+				count_detection({_p})
+				exit loop
+				stop
+			if {_distance} < {max_count_red}:
+				update score with id "count_blue" to "&9Blue Count" and {_distance}
+				set {max_count_red} to {_distance}
+				if  {max_count_red} < {max_count_blue}:
+					if {count_lead} is "blue":
+						send "カウントリードした！！" to {red::*}
+						set {count_lead} to "red"
+						if {game_extension} is true:
+							win("red")
+			wait 1 tick
+	if {blue::*} contain {_p}:
+		set {_goal_distance} to distance between {map_setting::spawn_core} and {map_setting::core::red}
+		set {_goal_location} to {map_setting::core::red}
+		while {dropped_core} is not true:
+			set {_distance} to round(distance between {_goal_location} and location of {_p} / {_goal_distance} * 100)
+			if {_distance} > 100:
+				wait 1 seconds
+				count_detection({_p})
+				exit loop
+				stop
+			if {_distance} < {max_count_blue}:
+				update score with id "count_red" to "&cRed Count" and {_distance}
+				set {max_count_blue} to {_distance}
+				if  {max_count_blue} < {max_count_red}:
+					if {count_lead} is "red":
+						send "カウントリードした！！" to {blue::*}
+						set {count_lead} to "blue"
+						if {game_extension} is true:
+							win("blue")
+			wait 1 tick
+
+function count_scoreboard(p: player):
+	set name of sidebar of {_p} to "&6&l戦況"
+	set id based score "&cRed Count" in sidebar of {_p} to 100 with id "count_red"
+	set id based score "&9Blue Count" in sidebar of {_p} to 100 with id "count_blue"

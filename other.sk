@@ -1,0 +1,74 @@
+on skript start:
+	reset()
+
+on first join:
+	wait 2 tick
+	set gamemode of player to adventure
+	#ステータス設定
+	command "/status_reset %player%"
+	wait 1 tick
+	set gamemode of player to adventure
+
+command /status_reset <player>:
+	trigger:
+		set {xp.%arg 1%} to 0
+		set {first_join.%arg 1%} to floor(unix timestamp of now)
+		set {kill.%arg 1%} to 0
+		delete {has_kits.%arg 1%::*}
+		add "knight" to {has_kits.%arg 1%::*}
+		add "archer" to {has_kits.%arg 1%::*}
+		add "tank" to {has_kits.%arg 1%::*}
+
+function bossbar_timer(seconds: number):
+	set {bartimer} to new bossbar
+	set color of bossbar {bartimer} to purple
+	set style of bossbar {bartimer} to solid
+	set skellett progress of bossbar {bartimer} to 1
+	set {_time} to {_seconds}
+	set {_division} to {_seconds}
+	loop all players:
+		add loop-player to boss bar {bartimer}
+	while {_time} > 0:
+		if {game} is not true:
+			loop all players:
+				try:
+					remove loop-player from bossbar {bartimer}
+			exit loop
+			stop
+		set skellett progress of bossbar {bartimer} to {_time} / {_division}
+		if {_time} >= 60:
+			if mod({_time}, 60) >= 10:
+				set string of bossbar {bartimer} to "&6&lTime &r&l%floor({_time} / 60)%:%mod({_time}, 60)%"
+			else:
+				set string of bossbar {bartimer} to "&6&lTime &r&l%floor({_time} / 60)%:0%mod({_time}, 60)%"
+		else if {_time} >= 10:
+			set string of bossbar {bartimer} to "&6&lTime &r&l0:%{_time}%"
+		else:
+			set string of bossbar {bartimer} to "&6&lTime &r&l0:0%{_time}%"
+		remove 1 from {_time}
+		wait 1 seconds
+	loop all players:
+		try:
+			remove loop-player from bossbar {bartimer}
+	delete {bartimer}
+	#タイムアップだったら
+	if {game} is true:
+		timeup()
+
+function auto_team_select() :: string:
+	set {_reds} to number of {red::*}
+	set {_blues} to number of {blue::*}
+	if {red::*} is not set:
+		set {_reds} to 0
+	if {blue::*} is not set:
+		set {_blues} to 0
+	if {_reds} = {_blues}:
+		set {_randomjoin} to random integer between 1 and 2
+		if {_randomjoin} is 1:
+			return "red"
+		else if {_randomjoin} is 2:
+			return "blue"
+	else if {_reds} < {_blues}:
+		return "red"
+	else if {_reds} > {_blues}:
+		return "blue"

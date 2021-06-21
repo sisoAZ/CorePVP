@@ -1,0 +1,77 @@
+command /kit_item <player> <text>:
+	trigger:
+		clear arg 1's inventory
+		set {cooltime.%arg 1%} to -1
+		if arg 2 is "knight":
+			set slot 0 of arg 1's inventory to stone sword
+			set slot 8 of arg 1's inventory to blaze powder named "&c全体攻撃"
+			set helmet of arg 1 to chainmail helmet
+			set chestplate of arg 1 to leather chestplate
+			set boots of arg 1 to leather boots
+		if arg 2 is "archer":
+			set slot 0 of arg 1's inventory to wooden sword
+			set slot 1 of arg 1's inventory to bow
+			set slot 2 of arg 1's inventory to 16 of arrow
+			set slot 8 of arg 1's inventory to feather named "&bスピード2"
+			set helmet of arg 1 to leather helmet
+			set boots of arg 1 to leather boots
+		if arg 2 is "tank":
+			set slot 0 of arg 1's inventory to wooden sword
+			set chestplate of arg 1 to diamond chestplate
+			set slot 8 of arg 1's inventory to apple named "&c耐性1+再生1"
+
+
+#Knight
+on rightclick holding blaze powder:
+	name of held item contain "全体攻撃"
+	if {cooltime.%player%} > 0:
+		stop
+	#ここからコード
+	loop hostile_team(player):
+		distance between location of loop-player and location of player <= 5
+		make player to damage loop-player by 4
+	cooltime(player, 30)
+
+#Archer
+on rightclick holding feather:
+	name of held item contain "スピード2"
+	if {cooltime.%player%} > 0:
+		stop
+	loop frendly_team(player):
+		distance between location of loop-player and location of player <= 10
+		apply speed of tier 2 to player for 5 seconds
+	cooltime(player, 20)
+
+#Tank
+on rightclick holding apple:
+	name of held item contain "耐性1+再生1"
+	if {cooltime.%player%} > 0:
+		stop
+	loop frendly_team(player):
+		distance between location of loop-player and location of player <= 10
+		apply resistance of tier 1 to player for 5 seconds
+		apply regeneration of tier 1 to player for 5 seconds
+	cooltime(player, 30)
+
+
+function hostile_team(p: player) :: players:
+	if {red::*} contain {_p}:
+		return {blue::*}
+	if {blue::*} contain {_p}:
+		return {red::*}
+
+function frendly_team(p: player) :: players:
+	if {red::*} contain {_p}:
+		return {red::*}
+	if {blue::*} contain {_p}:
+		return {blue::*}
+
+function cooltime(p: player, time: number):
+	set {cooltime.%{_p}%} to {_time}
+	send "%{cooltime.%{_p}%}%" to ops
+	while {cooltime.%{_p}%} > 1:
+		remove 1 from {cooltime.%{_p}%}
+		send action bar "&6&l%{cooltime.%{_p}%}%" to {_p}
+		wait 1 seconds
+	send action bar "&aReady" to {_p}
+	set {cooltime.%{_p}%} to -1
