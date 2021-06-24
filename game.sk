@@ -35,6 +35,11 @@ command /start:
 
 on respawn:
 	wait a tick
+	send subtitle "&3&lリスポーン中..." to player for 5 seconds
+	teleport player to block 30 meters above {map_setting::spawn_core}
+	set gamemode of player to spectator
+	wait 6 seconds
+	set gamemode of player to survival
 	command "/respawn %player%"
 
 command /respawn <player>:
@@ -48,6 +53,9 @@ command /respawn <player>:
 			teleport arg 1 to random location of {map_setting::spawn::red::*}
 		if {blue::*} contain arg 1:
 			teleport arg 1 to random location of {map_setting::spawn::blue::*}
+		if {mode} is "bow":
+			set slot 0 of arg 1's inventory to bow of power 30
+			set slot 8 of arg 1's inventory to 64 arrow
 
 command /teamjoin <player> <text>:
 	permission: siso
@@ -126,13 +134,10 @@ function timeup():
 			game_extension()
 		else:
 			win("blue")
-	else:
-		game_extension()
 		stop
-	if {max_count_blue} is {max_count_red}:
-		broadcast "&6&l引き分け！！"
-		reset()
-		stop
+	broadcast "&6&l引き分け！！"
+	reset()
+	stop
 
 function game_extension():
 	send "extension" to ops

@@ -46,6 +46,7 @@ function bossbar_timer(seconds: number):
 			set string of bossbar {bartimer} to "&6&lTime &r&l0:%{_time}%"
 		else:
 			set string of bossbar {bartimer} to "&6&lTime &r&l0:0%{_time}%"
+			send title "&e&l%{_time}%" to all players for 1 second
 		remove 1 from {_time}
 		wait 1 seconds
 	loop all players:
