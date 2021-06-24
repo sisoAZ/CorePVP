@@ -1,4 +1,5 @@
 command /kit_item <player> <text>:
+	permission: siso
 	trigger:
 		clear arg 1's inventory
 		set {cooltime.%arg 1%} to -1

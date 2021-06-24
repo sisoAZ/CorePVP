@@ -28,7 +28,7 @@ on death of player:
 		reset_core()
 		wait 1 tick
 		drop nether star at location of player without velocity
-		loop dropped items in radius 5 of location of player:
+		loop dropped items in radius 10 of location of player:
 			if "%item of loop-value%" contain "nether star":
 				set glowing of loop-value to true
 		#延長だったら
@@ -37,7 +37,7 @@ on death of player:
 			if {red::*} contain {has_core}:
 				win("blue")
 			if {blue::*} contain {has_core}:
-				win("win")
+				win("red")
 
 on respawn:
 	set glowing of player to false
@@ -116,7 +116,9 @@ function count_detection(p: player):
 				exit loop
 				stop
 			if {_distance} < {max_count_red}:
-				update score with id "count_blue" to "&9Blue Count" and {_distance}
+				update score with id "count_red" to "&cRed Count" and {_distance}
+				if {_distance} >= 100:
+					send "&4BUG DETECTED %{_distance}%" to ops
 				set {max_count_red} to {_distance}
 				if  {max_count_red} < {max_count_blue}:
 					if {count_lead} is "blue":
@@ -136,7 +138,9 @@ function count_detection(p: player):
 				exit loop
 				stop
 			if {_distance} < {max_count_blue}:
-				update score with id "count_red" to "&cRed Count" and {_distance}
+				if {_distance} >= 100:
+					send "&4BUG DETECTED %{_distance}%" to ops
+				update score with id "count_blue" to "&9Blue Count" and {_distance}
 				set {max_count_blue} to {_distance}
 				if  {max_count_blue} < {max_count_red}:
 					if {count_lead} is "red":

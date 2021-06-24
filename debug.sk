@@ -1,7 +1,18 @@
 command /ea <text>:
-    trigger:
-        evaluate arg 1
+	permission: siso
+	trigger:
+		evaluate arg 1
 
 command /getalltypes:
-    trigger:
-        stop
+	trigger:
+		stop
+
+command /pd <player>:
+	permission: siso
+	trigger:
+		make arg 1 to damage "siso_AZ" parsed as player by 100
+
+#on packet event play_server_named_sound_effect:
+#	if "%object pinfo 0 of event-packet%" contain "10d307f1":
+#	send "%object pinfo 0 of event-packet%"
+#	clear helmet of player

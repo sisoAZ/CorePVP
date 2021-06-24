@@ -9,6 +9,7 @@ options:
 	kit_cost: 300
 
 command /select_kit <player>:
+	permission: siso
 	trigger:
 		open chest with 6 row named "&6&lSelect Kit" to arg 1
 		set {_slot} to 0
@@ -30,6 +31,7 @@ on inventory click:
 	close player's inventory
 
 command /kit_shop <player>:
+	permission: siso
 	trigger:
 		open chest with 6 row named "&5&lKit SHOP" to arg 1
 		set {_slot} to 0
@@ -46,7 +48,7 @@ on inventory click:
 	kit_buy(player, {get_kits::%uncolored name of clicked item%}, {@kit_cost})
 
 function kit_buy(p: player, kit: string, cost: number):
-	if {xp.%{_p}%} < {_const}:
+	if {xp.%{_p}%} < {_cost}:
 		send "&cXPが足りません" to {_p}
 		stop
 	if {has_kits.%{_p}%::*} contain {_kit}:

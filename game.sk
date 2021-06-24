@@ -1,6 +1,6 @@
 #gamestart
 command /start:
-	permission: admin
+	permission: siso
 	trigger:
 		if {mv_bug_stop} is true:
 			send "&cゲームを開始できませんでした (mv bug stopper)" to ops
@@ -20,13 +20,14 @@ command /start:
 				command "/teamjoin %loop-player% blue"
 		wait a tick
 		spawn_core()
-		bossbar_timer(60)
+		bossbar_timer({settings.time})
 
 on respawn:
 	wait a tick
 	command "/respawn %player%"
 
 command /respawn <player>:
+	permission: siso
 	trigger:
 		clear arg 1's inventory
 		command "/kit_item %arg 1% %{kit.%arg 1%}%"
@@ -38,6 +39,7 @@ command /respawn <player>:
 			teleport arg 1 to random location of {map_setting::spawn::blue::*}
 
 command /teamjoin <player> <text>:
+	permission: siso
 	trigger:
 		if arg 2 is "red":
 			command "/scoreboard teams join red %arg 1%"
@@ -116,7 +118,7 @@ function timeup():
 	else:
 		game_extension()
 		stop
-	if {max_count_blue} = {max_count_red}:
+	if {max_count_blue} is {max_count_red}:
 		broadcast "&6&l引き分け！！"
 		reset()
 		stop
@@ -134,6 +136,7 @@ function win(color: text):
 	reset()
 
 command /stopgame:
+	permission: siso
 	trigger:
 		reset()
 
