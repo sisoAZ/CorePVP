@@ -96,3 +96,6 @@ function client_side_helmet_equip(p: player):
 on death of player:
 	wait 2 ticks
 	force player to respawn
+
+function sound(p: player, sound: text, pitch: number = 1):
+	play sound {_sound} with volume 1 and pitch {_pitch} at {_p} for {_p}

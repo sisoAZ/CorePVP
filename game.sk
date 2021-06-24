@@ -18,7 +18,18 @@ command /start:
 				command "/teamjoin %loop-player% red"
 			if {blue::*} contain loop-player:
 				command "/teamjoin %loop-player% blue"
-		wait a tick
+		wait 1 tick
+		loop all players:
+			set gamemode of loop-player to spectator
+			teleport loop-player to {map_setting::spawn_core}
+			send title "&6MAP" with subtitle "&a%{last_map}%" to loop-player for 3 seconds
+			sound(loop-player, "block.end_portal.spawn")
+		wait 6 seconds
+		loop all players:
+			send title "&6&lGO!!" to loop-player for 2 seconds
+			set gamemode of loop-player to survival
+			command "/respawn %loop-player%"
+			sound(loop-player, "entity.item.break")
 		spawn_core()
 		bossbar_timer({settings.time})
 

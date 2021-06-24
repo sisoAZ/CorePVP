@@ -1,5 +1,4 @@
 on pick up of nether star:
-	send "Pick up ne" to player
 	set {dropped_core} to false
 	set glowing of player to true
 	#apply weakness of tier 1 without particles to player for 30 minutes
@@ -11,6 +10,11 @@ on pick up of nether star:
 			set {count_lead} to "red"
 		if {blue::*} contain {has_core}:
 			set {count_lead} to "blue"
+	sound(player, "entity.experience_orb.pickup", 0.9)
+	if {red::*} contain player:
+		send "&c%player%&aがコアを持った！" to all players
+	if {blue::*} contain player:
+		send "&9%player%&aがコアを持った！" to all players
 	if {max_count_red} is not set:
 		set {max_count_red} to 100
 	if {max_count_blue} is not set:
@@ -31,6 +35,10 @@ on death of player:
 		loop dropped items in radius 10 of location of player:
 			if "%item of loop-value%" contain "nether star":
 				set glowing of loop-value to true
+		if {red::*} contain player:
+			send "&c%player%&2がコアを失った..." to all players
+		if {blue::*} contain player:
+			send "&9%player%&2がコアを失った..." to all players
 		#延長だったら
 		if {game_extension} is true:
 			#ゴールまでたどり着かず倒された場合
@@ -122,7 +130,12 @@ function count_detection(p: player):
 				set {max_count_red} to {_distance}
 				if  {max_count_red} < {max_count_blue}:
 					if {count_lead} is "blue":
-						send "カウントリードした！！" to {red::*}
+						send subtitle "&aカウントリードした！！" to {red::*} for 1 second
+						send subtitle "&cカウントリードされた..." to {blue::*} for 1 second
+						loop {red::*}:
+							sound(loop-value, "entity.arrow.hit_player", 0.5)
+						loop {blue::*}:
+							sound(loop-value, "entity.endermen.teleport", 0)
 						set {count_lead} to "red"
 						if {game_extension} is true:
 							win("red")
@@ -144,7 +157,12 @@ function count_detection(p: player):
 				set {max_count_blue} to {_distance}
 				if  {max_count_blue} < {max_count_red}:
 					if {count_lead} is "red":
-						send "カウントリードした！！" to {blue::*}
+						send subtitle "&aカウントリードした！！" to {blue::*} for 1 second
+						loop {blue::*}:
+							sound(loop-value, "entity.arrow.hit_player", 0.5)
+						send subtitle "&cカウントリードされた..." to {red::*} for 1 second
+						loop {red::*}:
+							sound(loop-value, "entity.endermen.teleport", 0)
 						set {count_lead} to "blue"
 						if {game_extension} is true:
 							win("blue")
