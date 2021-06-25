@@ -228,6 +228,7 @@ on join:
 			give nether star named "&6Team Join" to player
 
 on quit:
+	set quit message to ""
 	if {has_core} is player:
 		remove all nether stars from player's inventory
 		spawn_core()
