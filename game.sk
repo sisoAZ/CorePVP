@@ -105,8 +105,10 @@ on rightclick holding nether star:
 	command "clear %player%"
 	set {_team} to auto_team_select()
 	if {_team} is "red":
+		add player to {red::*}
 		command "/teamjoin %player% red"
 	if {_team} is "blue":
+		add player to {blue::*}
 		command "/teamjoin %player% blue"
 	add player to {join::*}
 
@@ -176,6 +178,8 @@ function reset():
 	set {game_extension} to false
 	set {already_first_get} to false
 	set {dropped_core} to true
+	set {max_count_red} to 100
+	set {max_count_blue} to 100
 	loop all players:
 		teleport loop-player to {lobby}
 		set gamemode of loop-player to adventure
@@ -194,8 +198,6 @@ function reset():
 	delete {red::*}
 	delete {blue::*}
 	delete {join::*}
-	delete {max_count_blue}
-	delete {max_count_red}
 	command "/scoreboard teams remove red"
 	command "/scoreboard teams remove blue"
 	map_create()
@@ -234,3 +236,8 @@ on quit:
 	if {has_core} is player:
 		remove all nether stars from player's inventory
 		spawn_core()
+	if {red::*} contain player:
+		remove player from {red::*}
+	if {blue::*} contain player:
+		remove player from {blue::*}
+	remove player from {join::*}

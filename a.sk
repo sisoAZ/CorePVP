@@ -162,5 +162,5 @@ function count_detection(p: player):
 
 function count_scoreboard(p: player):
 	set name of sidebar of {_p} to "&6&l戦況"
-	set id based score "&cRed Count" in sidebar of {_p} to 100 with id "count_red"
-	set id based score "&9Blue Count" in sidebar of {_p} to 100 with id "count_blue"
+	set id based score "&cRed Count" in sidebar of {_p} to {max_count_red} with id "count_red"
+	set id based score "&9Blue Count" in sidebar of {_p} to {max_count_blue} with id "count_blue"
