@@ -140,7 +140,9 @@ function timeup():
 	stop
 
 function game_extension():
-	send "extension" to ops
+	send title "&6&l延長中!!" to all players for 1 seconds
+	loop all players:
+		sound(loop-player, "entity.zombie_villager.cure", 2)
 	set {game_extension} to true
 	stop
 
