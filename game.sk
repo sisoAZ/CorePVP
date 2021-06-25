@@ -145,6 +145,7 @@ function game_extension():
 	stop
 
 function win(color: text):
+	set {ending} to true
 	loop all players:
 		send title "&6&lFinish!!" to loop-player for 3 seconds
 		sound(loop-player, "entity.enderdragon.ambient")
