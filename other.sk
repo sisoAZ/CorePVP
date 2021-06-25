@@ -75,24 +75,21 @@ function auto_team_select() :: string:
 	else if {_reds} > {_blues}:
 		return "blue"
 
-function client_side_equip(entity: entity, itemslot: string, item: item, players: players):
-	replace " " with "" in {_itemslot}
-	set {_} to new play_server_entity_equipment packet
-	set int pnum 0 of {_} to id of {_entity}
-	set "ItemSlot" penum 0 of {_} to {_itemslot}
-	set "ItemModifier" pinfo 0 of {_} to {_item}
-	send {_players::*} packet {_}
-
-function client_side_helmet_equip(p: player):
-	if {red::*} contain {_p}:
-		set {_helmet} to leather helmet
-		dye {_helmet} red
-	if {blue::*} contain {_p}:
-		set {_helmet} to leather helmet
-		dye {_helmet} blue
-	#while {game} is true:
-	#	client_side_equip({_p}, "head", {_helmet}, all players)
-	#	wait 5 ticks
+#function client_side_equip(entity: entity, itemslot: string, item: item, players: players):
+#	replace " " with "" in {_itemslot}
+#	set {_} to new play_server_entity_equipment packet
+#	set int pnum 0 of {_} to id of {_entity}
+#	set "ItemSlot" penum 0 of {_} to {_itemslot}
+#	set "ItemModifier" pinfo 0 of {_} to {_item}
+#	send {_players::*} packet {_}
+#
+#function client_side_helmet_equip(p: player):
+#	if {red::*} contain {_p}:
+#		set {_helmet} to leather helmet
+#		dye {_helmet} red
+#	if {blue::*} contain {_p}:
+#		set {_helmet} to leather helmet
+#		dye {_helmet} blue
 
 on death of player:
 	wait 2 ticks

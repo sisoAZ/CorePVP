@@ -22,7 +22,7 @@ command /start:
 		loop all players:
 			set gamemode of loop-player to spectator
 			teleport loop-player to {map_setting::spawn_core}
-			send title "&6MAP" with subtitle "&a%{last_map}%" to loop-player for 3 seconds
+			send title "&6MAP: &a&l%{last_map}%" to loop-player for 3 seconds
 			sound(loop-player, "block.end_portal.spawn")
 		wait 6 seconds
 		loop all players:
@@ -145,10 +145,18 @@ function game_extension():
 	stop
 
 function win(color: text):
+	loop all players:
+		send title "&6&lFinish!!" to loop-player for 3 seconds
+		sound(loop-player, "entity.enderdragon.ambient")
+		set gamemode of loop-player to spectator
+	wait 4 seconds
+	loop all players:
+		sound(loop-player, "entity.player.levelup")
 	if {_color} is "red":
-		broadcast "Red teamの勝利"
+		send title "&c&lRED &a&lWIN!!" to all players for 3 seconds
 	if {_color} is "blue":
-		broadcast "Blue teamの勝利"
+		send title "&9&lBLUE &a&lWIN!!" to all players for 3 seconds
+	wait 4 seconds
 	reset()
 
 command /stopgame:

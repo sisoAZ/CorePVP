@@ -57,23 +57,15 @@ on respawn:
 on walking on emerald block:
 	{ending} is not true
 	if location of block is {map_setting::core::red}:
-		send "true"
 		if player has nether star:
-			send "has core"
 			if {blue::*} contain player:
-				send "Contain BLUE"
+				broadcast "&9%player%&6&lがタッチダウンした！！"
 				win("blue")
-		else:
-			send "not has core"
 	if location of block is {map_setting::core::blue}:
-		send "true"
 		if player has nether star:
-			send "has core"
 			if {red::*} contain player:
-				send "Contain red"
+				broadcast "&c%player%&6&lがタッチダウンした！！"
 				win("red")
-		else:
-			send "not has core"
 
 function spawn_core():
 	drop nether star at {map_setting::spawn_core} without velocity
