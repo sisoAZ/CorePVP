@@ -69,7 +69,6 @@ function frendly_team(p: player) :: players:
 
 function cooltime(p: player, time: number):
 	set {cooltime.%{_p}%} to {_time}
-	send "%{cooltime.%{_p}%}%" to ops
 	while {cooltime.%{_p}%} > 1:
 		remove 1 from {cooltime.%{_p}%}
 		send action bar "&6&l%{cooltime.%{_p}%}%" to {_p}

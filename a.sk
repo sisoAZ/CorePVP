@@ -42,9 +42,9 @@ on death of player:
 		#延長だったら
 		if {game_extension} is true:
 			#ゴールまでたどり着かず倒された場合
-			if {red::*} contain {has_core}:
+			if {red::*} contain player:
 				win("blue")
-			if {blue::*} contain {has_core}:
+			if {blue::*} contain player:
 				win("red")
 
 on respawn:
