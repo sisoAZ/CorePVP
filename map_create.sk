@@ -27,7 +27,7 @@ function map_create():
 		set {map_setting::spawn::blue::%loop-number%} to move_location_world({world_setting::%{_new_map}%::blue::spawn::%loop-number%}, "game")
 
 	set {last_map} to {_new_map}
-	broadcast "success %{_new_map}%"
+	send "&aMAP generate success &6%{_new_map}%" to ops
 	set {mv_bug_stop} to false
 
 function move_location_world(old_location: location, map: text) :: location:

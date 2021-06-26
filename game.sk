@@ -193,6 +193,7 @@ function reset():
 		set level progress of loop-player to 0
 		give emerald named "&6SHOP" to loop-player
 		give chest named "&6Select Kit" to loop-player
+		set slot 8 of loop-player's inventory to writable book named "&dフィードバック" with lore "&9&l著名すると運営に送信されます"
 		wipe loop-player's sidebar
 	command "/effect @a clear"
 	delete {red::*}
@@ -201,6 +202,15 @@ function reset():
 	command "/scoreboard teams remove red"
 	command "/scoreboard teams remove blue"
 	map_create()
+	if {auto_start} is true:
+		broadcast "&630秒後に試合を開始します！"
+		wait 30 seconds
+		#二人以下だったら
+		if size of all players < 2:
+			broadcast "&cプレイヤーが足りないのでゲームを開始できませんでした"
+			reset()
+			stop
+		command "/start"
 
 on join:
 	broadcast "&6%player% has join"

@@ -1,0 +1,5 @@
+on book sign:
+	add all content of event-item to {feedback::*}
+	send "&aフィードバックを送信しました！！"
+	send "&aフィードバックを受信しました" to ops
+	send "&6%all content of event-item%" to ops

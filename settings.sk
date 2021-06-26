@@ -11,6 +11,7 @@ command /settings [<text>] [<text>] [<text>] [<text>]:
 			send "&6/settings permission_area (area)"
 			send "&6/settings time (number)"
 			send "&6/mode (normal|bow)"
+			send "&6/autostart (on|off)"
 			send "&6/settings allunlock (on|off)"
 			stop
 		if arg 1 is "world":
@@ -59,6 +60,13 @@ command /settings [<text>] [<text>] [<text>] [<text>]:
 			if arg 2 is "bow":
 				set {mode} to "bow"
 				send "&aSet mode to bow"
+		if arg 1 is "autostart":
+			if arg 2 is "on":
+				set {auto_start} to true
+				send "&aSet auto start to on"
+			if arg 2 is "off":
+				delete {auto_start}
+				send "&aSet auto start to off"
 		if arg 1 is "allunlock":
 			if arg 2 is "on":
 				set {all_free_job} to true
