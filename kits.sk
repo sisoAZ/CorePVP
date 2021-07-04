@@ -17,6 +17,7 @@ command /kit_item <player> <text>:
 		if arg 2 is "miner":
 			set slot 0 of arg 1's inventory to wooden sword
 		command "/give_tools %arg 1%"
+
 #Miner
 on mine:
 	if block is iron ore:

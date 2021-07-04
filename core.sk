@@ -164,3 +164,7 @@ function count_scoreboard(p: player):
 	set name of sidebar of {_p} to "&6&l戦況"
 	set id based score "&cRed Count" in sidebar of {_p} to {max_count_red} with id "count_red"
 	set id based score "&9Blue Count" in sidebar of {_p} to {max_count_blue} with id "count_blue"
+
+	set id based score "" in sidebar of {_p} to 0 with id "none"
+	set id based score "&d&lMAP: &b&l%proper_case({last_map})%" in sidebar of {_p} to -1 with id "map"
+	set id based score "&e&lKit: &6&l%proper_case({kit.%{_p}%})%" in sidebar of {_p} to -2 with id "kit"

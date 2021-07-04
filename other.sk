@@ -134,3 +134,8 @@ on food level change:
 
 function sound(p: player, sound: text, pitch: number = 1):
 	play sound {_sound} with volume 1 and pitch {_pitch} at {_p} for {_p}
+
+function proper_case(string: text) :: text:
+	set {_first_text} to first characters of {_string} in upper case
+	set {_split_first_text} to last length of {_string} - 1 characters of {_string}
+	return "%{_first_text}%%{_split_first_text}%"
