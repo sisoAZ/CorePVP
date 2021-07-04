@@ -100,7 +100,7 @@ on break of emerald block:
 	cancel event
 
 on mine:
-	block is iron ore or gold ore:
+	block is iron ore or gold ore
 	if block is iron ore:
 		cancel event
 		give iron ingot to player
