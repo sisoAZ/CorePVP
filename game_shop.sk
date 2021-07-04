@@ -3,6 +3,7 @@ on script load:
 	register_shop_category("sword", iron sword)
 	register_shop_category("bow", bow)
 	register_shop_category("armor", iron chestplate)
+	register_shop_category("tool", diamond pickaxe)
 	register_shop_category("other", golden apple)
 	
 	delete {shop_all_items::*}
@@ -18,6 +19,11 @@ on script load:
 	register_shop(iron chestplate, iron ingot, 15, "armor")
 	register_shop(iron leggings, iron ingot, 15, "armor")
 	register_shop(iron boots, iron ingot, 15, "armor")
+
+	#tool
+	register_shop(diamond pickaxe, iron ingot, 5, "tool")
+	register_shop(diamond shovel, iron ingot, 5, "tool")
+	register_shop(diamond axe, iron ingot, 5, "tool")
 
 	#other
 	register_shop(fire charge, gold ingot, 5, "other")
