@@ -117,10 +117,10 @@ function count_detection(p: player):
 				stop
 			if {_distance} < {max_count_red}:
 				update score with id "count_red" to "&cRed Count" and {_distance}
-				if {_distance} >= 100:
-					send "&4BUG DETECTED %{_distance}%" to ops
 				set {max_count_red} to {_distance}
-				if  {max_count_red} < {max_count_blue}:
+				loop {blue::*}:
+					give gold ingot to loop-value parsed as player
+				if {max_count_red} < {max_count_blue}:
 					if {count_lead} is "blue":
 						send subtitle "&aカウントリードした！！" to {red::*} for 1 second
 						send subtitle "&cカウントリードされた..." to {blue::*} for 1 second
@@ -143,11 +143,11 @@ function count_detection(p: player):
 				exit loop
 				stop
 			if {_distance} < {max_count_blue}:
-				if {_distance} >= 100:
-					send "&4BUG DETECTED %{_distance}%" to ops
 				update score with id "count_blue" to "&9Blue Count" and {_distance}
 				set {max_count_blue} to {_distance}
-				if  {max_count_blue} < {max_count_red}:
+				loop {red::*}:
+					give gold ingot to loop-value parsed as player
+				if {max_count_blue} < {max_count_red}:
 					if {count_lead} is "red":
 						send subtitle "&aカウントリードした！！" to {blue::*} for 1 second
 						loop {blue::*}:

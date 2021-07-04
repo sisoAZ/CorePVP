@@ -1,0 +1,69 @@
+on script load:
+	delete {shop_all_categories::*}
+	register_shop_category("sword", iron sword)
+	register_shop_category("armor", iron chestplate)
+	register_shop_category("other", golden apple)
+	
+	delete {shop_all_items::*}
+	register_shop(iron sword, iron ingot, 5, "sword")
+	register_shop(diamond chestplate, gold ingot, 15, "armor")
+	register_shop(enchanted golden apple, gold ingot, 120, "other")
+
+#アイテム, 交換アイテム, 個数, アイテムカテゴリー
+function register_shop(item: item, type: item type, cost: number, category: text):
+	set {_item_id} to random 5 char string from `a-z0-9`
+	set {shop_items::%{_item_id}%::item} to {_item}
+	set {shop_items::%{_item_id}%::type} to {_type}
+	set {shop_items::%{_item_id}%::cost} to {_cost}
+	set {shop_items::%{_item_id}%::category} to {_category}
+
+	add {_item_id} to {shop_all_items::*}
+
+function register_shop_category(category: text, icon: item type):
+	set {shop_category::%{_category}%::icon} to {_icon}
+
+	add {_category} to {shop_all_categories::*}
+
+command /show_shop <player>:
+	trigger:
+		open chest with 1 row named "&aITEM SHOP" to arg 1
+		set {_slot} to 0
+		loop {shop_all_categories::*}:
+			set {_first_text} to first characters of loop-value in upper case
+			set {_split_first_text} to last length of loop-value - 1 characters of loop-value
+			set slot {_slot} of arg 1's current inventory to {shop_category::%loop-value%::icon} named "&6%{_first_text}%%{_split_first_text}%"
+			add 1 to {_slot}
+
+on inventory click:
+	name of player's current inventory contain "ITEM SHOP"
+	cancel event
+	name of clicked item is set
+	clicked item is not air
+	
+	set {_category} to uncolored name of clicked item in lower case
+	if {shop_all_categories::*} contain {_category}:
+		wait 1 tick
+		open chest with 6 row named "&6&l%name of clicked item% &aSHOP" to player
+		set {_slot} to 0
+		loop {shop_all_items::*}:
+			if {shop_items::%loop-value%::category} is {_category}:
+				set {_show_item} to {shop_items::%loop-value%::item}
+				add "&3Require: &e&l%{shop_items::%loop-value%::cost}% &6&l%{shop_items::%loop-value%::type}%" to lore of {_show_item}
+				set slot {_slot} of player's current inventory to {_show_item} with nbt "{shop_item_id:""%loop-value%""}"
+				add 1 to {_slot}
+
+on inventory click:
+	{shop_all_categories::*} contain first length of uncolored name of player's current inventory - 5 characters of uncolored name of player's current inventory
+	cancel event
+	clicked item is not air
+
+	set {_id} to tag "shop_item_id" of nbt of clicked item
+	set {_item} to {shop_items::%{_id}%::item}
+	set {_type} to {shop_items::%{_id}%::type}
+	set {_cost} to {shop_items::%{_id}%::cost}
+
+	if amount of {_type} in player's inventory < {_cost}:
+		send "&2%{_type}%&cが&2%{_cost}%&c個必要です"
+		stop
+	remove {_cost} of {_type} from player's inventory
+	give {_item} to player

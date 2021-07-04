@@ -1,59 +1,32 @@
 command /kit_item <player> <text>:
 	permission: siso
 	trigger:
-		clear arg 1's inventory
-		set {cooltime.%arg 1%} to -1
-		if arg 2 is "knight":
+		if {cooltime.%arg 1%} <= 15:
+			set {cooltime.%arg 1%} to -1
+		equip(arg 1)
+		if arg 2 is "attacker":
 			set slot 0 of arg 1's inventory to stone sword
-			set slot 8 of arg 1's inventory to blaze powder named "&c全体攻撃"
-			set helmet of arg 1 to chainmail helmet
-			set chestplate of arg 1 to leather chestplate
-			set boots of arg 1 to leather boots
-		if arg 2 is "archer":
+			set chestplate of arg 1 to iron chestplate
+		if arg 2 is "builder":
 			set slot 0 of arg 1's inventory to wooden sword
-			set slot 1 of arg 1's inventory to bow
-			set slot 2 of arg 1's inventory to 16 of arrow
-			set slot 8 of arg 1's inventory to feather named "&bスピード2"
-			set helmet of arg 1 to leather helmet
-			set boots of arg 1 to leather boots
-		if arg 2 is "tank":
+			add wool to {_blocks::*}
+			add brick block to {_blocks::*}
+			add log to {_blocks::*}
+			add end stone to {_blocks::*}
+			give 64 of random item of {_blocks::*} to arg 1
+		if arg 2 is "miner":
 			set slot 0 of arg 1's inventory to wooden sword
-			set chestplate of arg 1 to diamond chestplate
-			set slot 8 of arg 1's inventory to apple named "&c耐性1+再生1"
-
-
-#Knight
-on rightclick holding blaze powder:
-	name of held item contain "全体攻撃"
-	if {cooltime.%player%} > 0:
-		stop
-	#ここからコード
-	loop hostile_team(player):
-		distance between location of loop-player and location of player <= 5
-		make player to damage loop-player by 4
-	cooltime(player, 30)
-
-#Archer
-on rightclick holding feather:
-	name of held item contain "スピード2"
-	if {cooltime.%player%} > 0:
-		stop
-	loop frendly_team(player):
-		distance between location of loop-player and location of player <= 10
-		apply speed of tier 2 to player for 5 seconds
-	cooltime(player, 20)
-
-#Tank
-on rightclick holding apple:
-	name of held item contain "耐性1+再生1"
-	if {cooltime.%player%} > 0:
-		stop
-	loop frendly_team(player):
-		distance between location of loop-player and location of player <= 10
-		apply resistance of tier 1 to player for 5 seconds
-		apply regeneration of tier 1 to player for 5 seconds
-	cooltime(player, 30)
-
+		command "/give_tools %arg 1%"
+#Miner
+on mine:
+	if block is iron ore:
+		cancel event
+		if {kit.%player%} is "miner":
+			give iron ingot to player
+	if block is gold ore:
+		cancel event
+		if {kit.%player%} is "miner":
+			give gold ingot to player
 
 function hostile_team(p: player) :: players:
 	if {red::*} contain {_p}:
@@ -75,3 +48,45 @@ function cooltime(p: player, time: number):
 		wait 1 seconds
 	send action bar "&aReady" to {_p}
 	set {cooltime.%{_p}%} to -1
+
+#装備
+function equip(p: player):
+	if {red::*} contain {_p}:
+		if "%helmet of {_p}%" is "<none>":
+			set {_item} to leather helmet
+			dye {_item} red
+			set helmet of {_p} to {_item} named "&cRedArmor" with lore "&6Soulbound"
+		if "%chestplate of {_p}%" is "<none>":
+			set {_item} to leather chestplate
+			dye {_item} red
+			set chestplate of {_p} to {_item} named "&cRedArmor" with lore "&6Soulbound"
+		if "%leggings of {_p}%" is "<none>":
+			set {_item} to leather leggings
+			dye {_item} red
+			set leggings of {_p} to {_item} named "&cRedArmor" with lore "&6Soulbound"
+		if "%boots of {_p}%" is "<none>":
+			set {_item} to leather boots
+			dye {_item} red
+			set boots of {_p} to {_item} named "&cRedArmor" with lore "&6Soulbound"
+	if {blue::*} contain {_p}:
+		if "%helmet of {_p}%" is "<none>":
+			set {_item} to leather helmet
+			dye {_item} blue
+			set helmet of {_p} to {_item} named "&9BlueArmor" with lore "&6Soulbound"
+		if "%chestplate of {_p}%" is "<none>":
+			set {_item} to leather chestplate
+			dye {_item} blue
+			set chestplate of {_p} to {_item} named "&9BlueArmor" with lore "&6Soulbound"
+		if "%leggings of {_p}%" is "<none>":
+			set {_item} to leather leggings
+			dye {_item} blue
+			set leggings of {_p} to {_item} named "&9BlueArmor" with lore "&6Soulbound"
+		if "%boots of {_p}%" is "<none>":
+			set {_item} to leather boots
+			dye {_item} blue
+			set boots of {_p} to {_item} named "&9BlueArmor" with lore "&6Soulbound"
+
+command /give_tools <player>:
+	permission: siso
+	trigger:
+		give iron pickaxe to arg 1

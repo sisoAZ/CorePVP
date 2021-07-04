@@ -1,9 +1,9 @@
 
 on script load:
 	delete {all_kits::*}
-	register_kit("knight", "Knight", "&6最強戦士", stone sword)
-	register_kit("archer", "Archer", "&3ボウスパムやめてください", bow)
-	register_kit("tank", "Tank", "&9堅い", diamond chestplate)
+	register_kit("attacker", "Attack", "&cとにかく攻め！！", stone sword)
+	register_kit("builder", "Builder", "&3建築で防衛してね！！", brick block)
+	register_kit("miner", "Miner", "&6金掘り奴隷と化すのだ...", diamond pickaxe)
 
 options:
 	kit_cost: 300

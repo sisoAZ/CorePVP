@@ -95,5 +95,42 @@ on death of player:
 	wait 2 ticks
 	force player to respawn
 
+on break of emerald block:
+	{game} is true
+	cancel event
+
+on mine:
+	block is iron ore or gold ore:
+	if block is iron ore:
+		cancel event
+		give iron ingot to player
+	if block is gold ore:
+		cancel event
+		give gold ingot to player
+	set {_loc} to location of block
+	set {_block} to type of block
+	set block at {_loc} to bedrock
+	wait 3 seconds
+	set block at {_loc} to {_block}
+			
+on inventory click:
+	#39 is helmet
+	if clicked slot is 39:
+		if clicked item is leather helmet:
+			cancel event
+
+on rightclick on villager:
+	if clicked entity is villager:
+		if name of clicked entity contain "SHOP":
+			cancel event
+			execute player command "/show_shop %player%"
+
+on damage of villager:
+	{game} is true
+	cancel event
+
+on food level change:
+	cancel event
+
 function sound(p: player, sound: text, pitch: number = 1):
 	play sound {_sound} with volume 1 and pitch {_pitch} at {_p} for {_p}

@@ -46,6 +46,8 @@ command /respawn <player>:
 	permission: siso
 	trigger:
 		clear arg 1's inventory
+		heal arg 1
+		set the arg 1's food level to 10
 		command "/kit_item %arg 1% %{kit.%arg 1%}%"
 		if {kit.%arg 1%} is not set:
 			command "/kit_item %arg 1% knight"
@@ -193,7 +195,7 @@ function reset():
 		set level progress of loop-player to 0
 		give emerald named "&6SHOP" to loop-player
 		give chest named "&6Select Kit" to loop-player
-		set slot 8 of loop-player's inventory to writable book named "&dフィードバック" with lore "&9&l著名すると運営に送信されます"
+		set slot 8 of loop-player's inventory to type of writable book named "&dフィードバック" with lore "&9&l著名すると運営に送信されます"
 		wipe loop-player's sidebar
 	command "/effect @a clear"
 	delete {red::*}
