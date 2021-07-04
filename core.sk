@@ -119,7 +119,7 @@ function count_detection(p: player):
 				update score with id "count_red" to "&cRed Count" and {_distance}
 				set {max_count_red} to {_distance}
 				loop {blue::*}:
-					give gold ingot to loop-value parsed as player
+					give gold ingot to loop-value's inventory
 				if {max_count_red} < {max_count_blue}:
 					if {count_lead} is "blue":
 						send subtitle "&aカウントリードした！！" to {red::*} for 1 second
@@ -146,7 +146,7 @@ function count_detection(p: player):
 				update score with id "count_blue" to "&9Blue Count" and {_distance}
 				set {max_count_blue} to {_distance}
 				loop {red::*}:
-					give gold ingot to loop-value parsed as player
+					give gold ingot to loop-value's inventory
 				if {max_count_blue} < {max_count_red}:
 					if {count_lead} is "red":
 						send subtitle "&aカウントリードした！！" to {blue::*} for 1 second

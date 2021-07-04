@@ -24,7 +24,7 @@ command /start:
 			teleport loop-player to {map_setting::spawn_core}
 			send title "&6MAP: &a&l%{last_map}%" to loop-player for 3 seconds
 			sound(loop-player, "block.end_portal.spawn")
-		wait 6 seconds
+		#wait 6 seconds
 		loop all players:
 			send title "&6&lGO!!" to loop-player for 2 seconds
 			set gamemode of loop-player to survival
