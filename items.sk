@@ -1,0 +1,3 @@
+on rightclick holding fire charge:
+    remove 1 of fire charge from player's inventory
+    shoot a fireball from the player at speed 2

@@ -1,13 +1,27 @@
 on script load:
 	delete {shop_all_categories::*}
 	register_shop_category("sword", iron sword)
+	register_shop_category("bow", bow)
 	register_shop_category("armor", iron chestplate)
 	register_shop_category("other", golden apple)
 	
 	delete {shop_all_items::*}
+	#sword
 	register_shop(iron sword, iron ingot, 5, "sword")
-	register_shop(diamond chestplate, gold ingot, 15, "armor")
-	register_shop(enchanted golden apple, gold ingot, 120, "other")
+	register_shop(diamond sword, gold ingot, 10, "sword")
+
+	#bow
+	register_shop(bow, gold ingot, 5, "bow")
+	register_shop(5 of arrow, iron ingot, 1, "bow")
+
+	#iron armor
+	register_shop(iron chestplate, iron ingot, 15, "armor")
+	register_shop(iron leggings, iron ingot, 15, "armor")
+	register_shop(iron boots, iron ingot, 15, "armor")
+
+	#other
+	register_shop(fire charge, gold ingot, 5, "other")
+	register_shop(enchanted golden apple, gold ingot, 50, "other")
 
 #アイテム, 交換アイテム, 個数, アイテムカテゴリー
 function register_shop(item: item, type: item type, cost: number, category: text):
@@ -63,7 +77,10 @@ on inventory click:
 	set {_cost} to {shop_items::%{_id}%::cost}
 
 	if amount of {_type} in player's inventory < {_cost}:
-		send "&2%{_type}%&cが&2%{_cost}%&c個必要です"
+		if {_type} is iron ingot:
+			send "&f&l%{_type}%&cが&2&l%{_cost}%&c個必要です"
+		if {_type} is gold ingot:
+			send "&6&l%{_type}%&cが&2&l%{_cost}%&c個必要です"
 		stop
 	remove {_cost} of {_type} from player's inventory
 	give {_item} to player
