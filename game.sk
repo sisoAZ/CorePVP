@@ -256,6 +256,7 @@ on join:
 
 on quit:
 	set quit message to ""
+	send "&e%player% has quit" to ops
 	if {has_core} is player:
 		remove all nether stars from player's inventory
 		spawn_core()
