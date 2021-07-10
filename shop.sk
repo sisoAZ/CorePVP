@@ -26,8 +26,9 @@ on script load:
 	register_shop(diamond axe, iron ingot, 5, "tool")
 
 	#other
-	register_shop(fire charge, gold ingot, 5, "other")
-	register_shop(enchanted golden apple, gold ingot, 50, "other")
+	register_shop(fire charge, gold ingot, 3, "other")
+	register_shop(paper named "Tools upgrade", gold ingot, 5, "other")
+	register_shop(enchanted golden apple, gold ingot, 30, "other")
 
 #アイテム, 交換アイテム, 個数, アイテムカテゴリー
 function register_shop(item: item, type: item type, cost: number, category: text):
@@ -89,4 +90,6 @@ on inventory click:
 			send "&6&l%{_type}%&cが&2&l%{_cost}%&c個必要です"
 		stop
 	remove {_cost} of {_type} from player's inventory
-	give {_item} to player
+	give {_item} to friendly_team(player)
+	send "&e%player%&6が&a%{_item}%&6を買った！" to friendly_team(player)
+	command "/give_enchant_tools %player%"

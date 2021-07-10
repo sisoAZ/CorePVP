@@ -1,3 +1,15 @@
 on rightclick holding fire charge:
     remove 1 of fire charge from player's inventory
     shoot a fireball from the player at speed 2
+
+on rightclick holding paper:
+    name of held item contain "tools upgrade"
+    remove held item from player's inventory
+    if {red::*} contain player:
+        add 1 to {enchant_level_red}
+        loop {red::*}:
+            command "/give_enchant_tools %loop-value%"
+    if {blue::*} contain player:
+        add 1 to {enchant_level_blue}
+        loop {blue::*}:
+            command "/give_enchant_tools %loop-value%"

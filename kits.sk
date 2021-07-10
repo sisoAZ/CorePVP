@@ -6,7 +6,7 @@ command /kit_item <player> <text>:
 		equip(arg 1)
 		if arg 2 is "attacker":
 			set slot 0 of arg 1's inventory to stone sword
-			set chestplate of arg 1 to iron chestplate
+			set chestplate of arg 1 to chainmail chestplate
 		if arg 2 is "builder":
 			set slot 0 of arg 1's inventory to wooden sword
 			add wool to {_blocks::*}
@@ -35,7 +35,7 @@ function hostile_team(p: player) :: players:
 	if {blue::*} contain {_p}:
 		return {red::*}
 
-function frendly_team(p: player) :: players:
+function friendly_team(p: player) :: players:
 	if {red::*} contain {_p}:
 		return {red::*}
 	if {blue::*} contain {_p}:
@@ -91,3 +91,14 @@ command /give_tools <player>:
 	permission: siso
 	trigger:
 		give iron pickaxe to arg 1
+		command "/give_enchant_tools %arg 1%"
+
+command /give_enchant_tools <player>:
+	permission: siso
+	trigger:
+		loop all items in arg 1's inventory:
+			if loop-item is pickaxe or axe or shovel:
+				if {red::*} contain arg 1:
+					enchant loop-item with "efficiency %{enchant_level_red}%" parsed as enchantment type
+				if {blue::*} contain arg 1:
+					enchant loop-item with "efficiency %{enchant_level_blue}%" parsed as enchantment type

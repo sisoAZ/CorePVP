@@ -5,6 +5,9 @@ command /start:
 		if {mv_bug_stop} is true:
 			send "&cゲームを開始できませんでした (mv bug stopper)" to ops
 			stop
+		if {game} is true:	
+			send "&cゲームはすでに開始されています" to ops
+			stop
 		set {game} to true
 		broadcast "&aゲームを開始します"
 		command "/gamemode 0 @a"
@@ -45,6 +48,8 @@ on respawn:
 command /respawn <player>:
 	permission: siso
 	trigger:
+		set {_amount_iron} to amount of iron ingot in arg 1's inventory
+		set {_amount_gold} to amount of gold ingot in arg 1's inventory
 		clear arg 1's inventory
 		heal arg 1
 		set the arg 1's food level to 10
@@ -58,6 +63,8 @@ command /respawn <player>:
 		if {mode} is "bow":
 			set slot 0 of arg 1's inventory to bow of power 30
 			set slot 8 of arg 1's inventory to 64 arrow
+		give {_amount_iron} of iron ingot to arg 1
+		give {_amount_gold} of gold ingot to arg 1
 
 command /teamjoin <player> <text>:
 	permission: siso
@@ -182,6 +189,8 @@ function reset():
 	set {dropped_core} to true
 	set {max_count_red} to 100
 	set {max_count_blue} to 100
+	set {enchant_level_red} to 1
+	set {enchant_level_blue} to 1
 	loop all players:
 		teleport loop-player to {lobby}
 		set gamemode of loop-player to adventure
