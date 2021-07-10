@@ -4,7 +4,7 @@ on rightclick holding fire charge:
 
 on rightclick holding paper:
     name of held item contain "tools upgrade"
-    remove held item from player's inventory
+    remove 1 of held item from player's inventory
     if {red::*} contain player:
         add 1 to {enchant_level_red}
         loop {red::*}:
