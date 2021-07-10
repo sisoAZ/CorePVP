@@ -132,6 +132,11 @@ on damage of villager:
 on food level change:
 	cancel event
 
+on command "/kill":
+	player is not op
+	cancel event
+	kill player
+
 function sound(p: player, sound: text, pitch: number = 1):
 	play sound {_sound} with volume 1 and pitch {_pitch} at {_p} for {_p}
 
