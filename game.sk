@@ -234,12 +234,14 @@ on join:
 			teleport player to {lobby}
 			set gamemode of player to adventure
 			clear player's inventory
+			give chest named "&6Select Kit" to player
 			give nether star named "&6Team join" to player
 	else:
 		wait 2 ticks
 		teleport player to {lobby}
 		set gamemode of player to adventure
 		clear player's inventory
+		give chest named "&6Select Kit" to player
 		if {game} is true:
 			give nether star named "&6Team Join" to player
 
