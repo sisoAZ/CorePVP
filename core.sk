@@ -21,10 +21,6 @@ on pick up of nether star:
 		set {max_count_blue} to 100
 	count_detection(player)
 
-on inventory click:
-	clicked item is nether star
-	cancel event
-
 on death of player:
 	if player has nether star:
 		set {dropped_core} to true
@@ -123,6 +119,8 @@ function count_detection(p: player):
 				set {max_count_red} to {_distance}
 				loop {blue::*}:
 					give iron ingot to loop-value's inventory
+					chance of 50%:
+						give gold ingot to loop-value's inventory
 				if {max_count_red} < {max_count_blue}:
 					if {count_lead} is "blue":
 						send subtitle "&aカウントリードした！！" to {red::*} for 1 second
@@ -153,6 +151,8 @@ function count_detection(p: player):
 				set {max_count_blue} to {_distance}
 				loop {red::*}:
 					give iron ingot to loop-value's inventory
+					chance of 50%:
+						give gold ingot to loop-value's inventory
 				if {max_count_blue} < {max_count_red}:
 					if {count_lead} is "red":
 						send subtitle "&aカウントリードした！！" to {blue::*} for 1 second
