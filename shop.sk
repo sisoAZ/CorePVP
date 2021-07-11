@@ -38,6 +38,7 @@ on script load:
 	#other
 	register_shop(fire charge, gold ingot, 5, "other")
 	register_shop(paper named "Tools upgrade", gold ingot, 30, "other")
+	register_shop(gold hoe named "EffectKiller", gold ingot, 10, "other")
 	register_shop(enchanted golden apple, gold ingot, 150, "other")
 
 #アイテム, 交換アイテム, 個数, アイテムカテゴリー

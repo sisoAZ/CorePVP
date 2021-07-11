@@ -1,15 +1,42 @@
 on rightclick holding fire charge:
-    remove 1 of fire charge from player's inventory
-    shoot a fireball from the player at speed 2
+	remove 1 of fire charge from player's inventory
+	shoot a fireball from the player at speed 2
 
 on rightclick holding paper:
-    name of held item contain "tools upgrade"
-    remove 1 of held item from player's inventory
-    if {red::*} contain player:
-        add 1 to {enchant_level_red}
-        loop {red::*}:
-            command "/give_enchant_tools %loop-value%"
-    if {blue::*} contain player:
-        add 1 to {enchant_level_blue}
-        loop {blue::*}:
-            command "/give_enchant_tools %loop-value%"
+	name of held item contain "tools upgrade"
+	remove 1 of held item from player's inventory
+	if {red::*} contain player:
+		add 1 to {enchant_level_red}
+		loop {red::*}:
+			command "/give_enchant_tools %loop-value%"
+	if {blue::*} contain player:
+		add 1 to {enchant_level_blue}
+		loop {blue::*}:
+			command "/give_enchant_tools %loop-value%"
+
+on right click with gold hoe:
+ name of tool of player contains "EffectKiller"
+ remove gold hoe named "EffectKiller" from the player
+ execute console command "/playsound minecraft:entity.zombie.attack_iron_door master %player% %x-coord of player% %y-coord of player% %z-coord of player% 2 1"
+ set {_loc} to location of event-player
+ add 1.5 to y-coordinate of {_loc}
+ set {_a2} to yaw of location of event-player - 270
+ set {_a1} to Pitch of location of event-player * -1
+ set {_x} to sin(90-{_a1}) * cos({_a2}) * 1
+ set {_z} to sin(90-{_a1}) * sin({_a2}) * 1
+ set {_y} to cos(90-{_a1}) * 1
+ loop 50 times:
+  add {_x} to x-coordinate of {_loc}
+  add {_y} to y-coordinate of {_loc}
+  add {_z} to z-coordinate of {_loc}
+  if block at {_loc} is not air or grass:
+   stop
+  drawDot count 0, particle "redstone", RGB 255, 255, 255, center {_loc}, rainbowMode false, visibleRange 100, pulseDelay 0, keepFor 5 ticks
+  loop living entities in radius 1.5 of {_loc}:
+   loop-entity is not "%player%"
+   if {red::*} contains player:
+	{blue::*} does not contain loop-entity
+   if {blue::*} contains player:
+	{red::*} does not contain loop-entity
+   execute console command "/effect %loop-entity% clear"
+   send "&a%loop-entity%のエフェクトを消した!"
