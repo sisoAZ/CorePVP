@@ -36,12 +36,20 @@ command /start:
 		spawn_core()
 		bossbar_timer({settings.time})
 
+on death of player:
+	set {_amount_iron} to amount of iron ingot in victim's inventory
+	set {_amount_gold} to amount of gold ingot in victim's inventory
+	give round({_amount_iron} / 2) of iron ingot to attacker's inventory
+	give round({_amount_gold} / 2) of gold ingot to attacker's inventory
+	set {_amount_gapple} to amount of enchanted golden apple in victim's inventory
+	give {_amount_gapple} to attacker's inventory
+
 on respawn:
 	wait a tick
-	send subtitle "&3&lリスポーン中..." to player for 5 seconds
+	send subtitle "&3&lリスポーン中..." to player for 4 seconds
 	teleport player to block 30 meters above {map_setting::spawn_core}
 	set gamemode of player to spectator
-	wait 6 seconds
+	wait 4 seconds
 	set gamemode of player to survival
 	command "/respawn %player%"
 
@@ -53,7 +61,7 @@ command /respawn <player>:
 		clear arg 1's inventory
 		heal arg 1
 		set the arg 1's food level to 10
-		apply resistance 4 to arg 1
+		apply resistance 4 to arg 1 for 6 seconds
 		command "/kit_item %arg 1% %{kit.%arg 1%}%"
 		if {kit.%arg 1%} is not set:
 			command "/kit_item %arg 1% knight"
