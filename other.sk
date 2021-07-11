@@ -8,6 +8,8 @@ on first join:
 	command "/status_reset %player%"
 	wait 1 tick
 	set gamemode of player to adventure
+	send "&e&lWelcome to CorePVP"
+	send "&5&lルール： &6&lMAP中央にあるコア（ネザースター）を拾って相手のゴールに向かえ！！"
 
 command /status_reset <player>:
 	permission: siso
