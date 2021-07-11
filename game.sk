@@ -56,12 +56,15 @@ on respawn:
 command /respawn <player>:
 	permission: siso
 	trigger:
+		if {join::*} do not contain arg 1:
+			give nether star named "&6Team join" to player
+			stop
 		set {_amount_iron} to amount of iron ingot in arg 1's inventory
 		set {_amount_gold} to amount of gold ingot in arg 1's inventory
 		clear arg 1's inventory
 		heal arg 1
 		set the arg 1's food level to 10
-		apply resistance 4 to arg 1 for 6 seconds
+		apply resistance 4 to arg 1 for 3 seconds
 		command "/kit_item %arg 1% %{kit.%arg 1%}%"
 		if {kit.%arg 1%} is not set:
 			command "/kit_item %arg 1% knight"
@@ -122,13 +125,14 @@ on rightclick holding nether star:
 	command "/gamemode 0 %player%"
 	command "clear %player%"
 	set {_team} to auto_team_select()
+	add player to {join::*}
 	if {_team} is "red":
 		add player to {red::*}
 		command "/teamjoin %player% red"
 	if {_team} is "blue":
 		add player to {blue::*}
 		command "/teamjoin %player% blue"
-	add player to {join::*}
+	add arg 1 to boss bar {bartimer}
 
 on rightclick holding emerald:
 	name of held item contain "SHOP"
@@ -225,7 +229,7 @@ function reset():
 		set level progress of loop-player to 0
 		give emerald named "&6SHOP" to loop-player
 		give chest named "&6Select Kit" to loop-player
-		set slot 8 of loop-player's inventory to type of writable book named "&dフィードバック" with lore "&9&l著名すると運営に送信されます"
+		set slot 8 of loop-player's inventory to type of writable book
 		wipe loop-player's sidebar
 	command "/effect @a clear"
 	delete {red::*}
