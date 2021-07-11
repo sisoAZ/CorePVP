@@ -1,12 +1,22 @@
 on script load:
+	#Register SHOP category
 	delete {shop_all_categories::*}
+	register_shop_category("block", grass block)
 	register_shop_category("sword", iron sword)
 	register_shop_category("bow", bow)
 	register_shop_category("armor", iron chestplate)
 	register_shop_category("tool", diamond pickaxe)
 	register_shop_category("other", golden apple)
-	
+
+	#Register shop item
 	delete {shop_all_items::*}
+
+	#Block
+	register_shop(16 of wool, iron ingot, 4, "block")
+	register_shop(64 of oak planks, iron ingot, 5, "block")
+	register_shop(10 of end stone, iron ingot, 5, "block")
+	register_shop(obsidian, gold ingot, 50, "block")
+
 	#sword
 	register_shop(iron sword, iron ingot, 5, "sword")
 	register_shop(diamond sword, gold ingot, 10, "sword")
@@ -17,8 +27,8 @@ on script load:
 
 	#iron armor
 	register_shop(iron chestplate, iron ingot, 15, "armor")
-	register_shop(iron leggings, iron ingot, 15, "armor")
-	register_shop(iron boots, iron ingot, 15, "armor")
+	register_shop(iron leggings, iron ingot, 10, "armor")
+	register_shop(iron boots, iron ingot, 10, "armor")
 
 	#tool
 	register_shop(diamond pickaxe, iron ingot, 5, "tool")
@@ -26,9 +36,9 @@ on script load:
 	register_shop(diamond axe, iron ingot, 5, "tool")
 
 	#other
-	register_shop(fire charge, gold ingot, 3, "other")
-	register_shop(paper named "Tools upgrade", gold ingot, 10, "other")
-	register_shop(enchanted golden apple, gold ingot, 100, "other")
+	register_shop(fire charge, gold ingot, 5, "other")
+	register_shop(paper named "Tools upgrade", gold ingot, 30, "other")
+	register_shop(enchanted golden apple, gold ingot, 150, "other")
 
 #アイテム, 交換アイテム, 個数, アイテムカテゴリー
 function register_shop(item: item, type: item type, cost: number, category: text):
@@ -99,6 +109,7 @@ on inventory click:
 				give {_item} to loop-value
 			else if rank_tool(has_higher_tool(loop-value, {_item})) < rank_tool(type of {_item}):
 				replace_tool(loop-value, {_item})
+			command "/give_enchant_tools %loop-value%"
 	else:
 		give {_item} to friendly_team(player)
 		
