@@ -16,7 +16,7 @@ on rightclick holding paper:
 
 on right click with gold hoe:
  name of tool of player contains "EffectKiller"
- remove gold hoe named "EffectKiller" from the player
+ remove 1 of held item from the player
  execute console command "/playsound minecraft:entity.zombie.attack_iron_door master %player% %x-coord of player% %y-coord of player% %z-coord of player% 2 1"
  set {_loc} to location of event-player
  add 1.5 to y-coordinate of {_loc}
@@ -35,8 +35,8 @@ on right click with gold hoe:
   loop living entities in radius 1.5 of {_loc}:
    loop-entity is not "%player%"
    if {red::*} contains player:
-	{blue::*} does not contain loop-entity
+	{blue::*} contain loop-entity
    if {blue::*} contains player:
-	{red::*} does not contain loop-entity
+	{red::*} contain loop-entity
    execute console command "/effect %loop-entity% clear"
    send "&a%loop-entity%のエフェクトを消した!"
