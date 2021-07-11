@@ -144,3 +144,66 @@ function proper_case(string: text) :: text:
 	set {_first_text} to first characters of {_string} in upper case
 	set {_split_first_text} to last length of {_string} - 1 characters of {_string}
 	return "%{_first_text}%%{_split_first_text}%"
+
+function rank_tool(tool: item type) :: number:
+	if "%{_tool}%" contain "wooden":
+		return 1
+	if "%{_tool}%" contain "gold":
+		return 2
+	if "%{_tool}%" contain "stone":
+		return 3
+	if "%{_tool}%" contain "iron":
+		return 4
+	if "%{_tool}%" contain "diamond":
+		return 5
+	
+	#Armor
+
+	if "%{_tool}%" contain "leather":
+		return 1
+	if "%{_tool}%" contain "gold":
+		return 2
+	if "%{_tool}%" contain "chainmail":
+		return 3
+	if "%{_tool}%" contain "iron":
+		return 4
+	if "%{_tool}%" contain "diamond":
+		return 5
+	
+
+function has_higher_tool(p: player, item: item) :: item type:
+	if {_item} is sword:
+		set {_type} to sword
+	if {_item} is armor:
+		if {_item} is helmet:
+			set {_type} to helmet
+		if {_item} is chestplate:
+			set {_type} to chestplate
+		if {_item} is leggings:
+			set {_type} to leggings
+		if {_item} is boots:
+			set {_type} to boots
+	if {_item} is pickaxe:
+		set {_type} to pickaxe
+	if {_item} is axe:
+		set {_type} to axe
+	if {_item} is shovel:
+		set {_type} to shovel
+
+	loop all items in {_p}'s inventory:
+		if type of loop-item is {_type}:
+			if {_most_higher_rank} is not set:
+				set {_most_higher_rank} to rank_tool(type of loop-item)
+				set {_most_higher_item} to type of loop-item
+			else:
+				set {_rank_tool} to rank_tool(type of loop-item)
+				if {_most_higher_rank} < {_rank_tool}:
+					set {_most_higher_rank} to {_rank_tool}
+					set {_most_higher_item} to type of loop-item
+	return {_most_higher_item}
+
+function replace_tool(p: player, item: item):
+	set {_replace_item} to has_higher_tool({_p}, {_item})
+	loop 40 times:
+		if type of slot loop-number - 1 of {_p}'s inventory is {_replace_item}:
+			set slot loop-number - 1 of {_p}'s inventory to {_item}

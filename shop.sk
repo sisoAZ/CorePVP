@@ -90,9 +90,17 @@ on inventory click:
 			send "&6&l%{_type}%&cが&2&l%{_cost}%&c個必要です"
 		stop
 	remove {_cost} of {_type} from player's inventory
-	if {shop_items::%{_id}%::category} is not "other":
-		give {_item} to friendly_team(player)
-	else:
+	if {shop_items::%{_id}%::category} is "other":
 		give {_item} to player
+	else if type of {_item} is armor or sword or pickaxe or axe or shovel:
+		loop friendly_team(player):
+			#もしそのアイテムを持っていなかったら
+			if has_higher_tool(loop-value, {_item}) is not set:
+				give {_item} to loop-value
+			else if rank_tool(has_higher_tool(loop-value, {_item})) < rank_tool(type of {_item}):
+				replace_tool(loop-value, {_item})
+	else:
+		give {_item} to friendly_team(player)
+		
 	send "&e%player%&6が&a%{_item}%&6を買った！" to friendly_team(player)
 	command "/give_enchant_tools %player%"
