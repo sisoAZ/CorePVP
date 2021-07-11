@@ -140,6 +140,12 @@ on command "/kill":
 	cancel event
 	kill player
 
+on chat:
+	if {red::*} contain player:
+		set chat format to "&c%player's name%&r: %colored message%"
+	if {blue::*} contain player:
+		set chat format to "&9%player's name%&r: %colored message%"
+
 function sound(p: player, sound: text, pitch: number = 1):
 	play sound {_sound} with volume 1 and pitch {_pitch} at {_p} for {_p}
 
@@ -166,7 +172,7 @@ function rank_tool(tool: item type) :: number:
 		return 1
 	if "%{_tool}%" contain "gold":
 		return 2
-	if "%{_tool}%" contain "chainmail":
+	if "%{_tool}%" contain "chain":
 		return 3
 	if "%{_tool}%" contain "iron":
 		return 4
