@@ -112,9 +112,12 @@ function count_detection(p: player):
 			set {_distance} to round(distance between {_goal_location} and location of {_p} / {_goal_distance} * 100)
 			if {_distance} > 100:
 				wait 1 seconds
+				set skellett progress of bossbar {bartimer} to 1
 				count_detection({_p})
 				exit loop
 				stop
+			set color of bossbar {bartimer} to red
+			set skellett progress of bossbar {bartimer} to {_distance} / 100
 			if {_distance} < {max_count_red}:
 				update score with id "count_red" to "&c&lRed Count" and {_distance}
 				set {max_count_red} to {_distance}
@@ -139,9 +142,12 @@ function count_detection(p: player):
 			set {_distance} to round(distance between {_goal_location} and location of {_p} / {_goal_distance} * 100)
 			if {_distance} > 100:
 				wait 1 seconds
+				set skellett progress of bossbar {bartimer} to 1
 				count_detection({_p})
 				exit loop
 				stop
+			set color of bossbar {bartimer} to blue
+			set skellett progress of bossbar {bartimer} to {_distance} / 100
 			if {_distance} < {max_count_blue}:
 				update score with id "count_blue" to "&9&lBlue Count" and {_distance}
 				set {max_count_blue} to {_distance}

@@ -36,7 +36,6 @@ function bossbar_timer(seconds: number):
 					remove loop-player from bossbar {bartimer}
 			exit loop
 			stop
-		set skellett progress of bossbar {bartimer} to {_time} / {_division}
 		if {_time} >= 60:
 			if mod({_time}, 60) >= 10:
 				set string of bossbar {bartimer} to "&6&lTime &r&l%floor({_time} / 60)%:%mod({_time}, 60)%"
@@ -174,6 +173,7 @@ function rank_tool(tool: item type) :: number:
 function has_higher_tool(p: player, item: item) :: item type:
 	if {_item} is sword:
 		set {_type} to sword
+
 	if {_item} is armor:
 		if {_item} is helmet:
 			set {_type} to helmet
@@ -183,10 +183,13 @@ function has_higher_tool(p: player, item: item) :: item type:
 			set {_type} to leggings
 		if {_item} is boots:
 			set {_type} to boots
+
 	if {_item} is pickaxe:
 		set {_type} to pickaxe
+
 	if {_item} is axe:
 		set {_type} to axe
+
 	if {_item} is shovel:
 		set {_type} to shovel
 
