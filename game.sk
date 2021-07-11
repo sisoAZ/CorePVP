@@ -53,6 +53,7 @@ command /respawn <player>:
 		clear arg 1's inventory
 		heal arg 1
 		set the arg 1's food level to 10
+		apply resistance 4 to arg 1
 		command "/kit_item %arg 1% %{kit.%arg 1%}%"
 		if {kit.%arg 1%} is not set:
 			command "/kit_item %arg 1% knight"
