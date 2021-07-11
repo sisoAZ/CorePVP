@@ -172,5 +172,9 @@ function count_scoreboard(p: player):
 	set id based score "&9&lBlue Count" in sidebar of {_p} to {max_count_blue} with id "count_blue"
 
 	set id based score "" in sidebar of {_p} to 0 with id "none"
-	set id based score "&dMAP: &b%proper_case({last_map})%" in sidebar of {_p} to -1 with id "map"
-	set id based score "&eKit: &6%proper_case({kit.%{_p}%})%" in sidebar of {_p} to -2 with id "kit.%{_p}%"
+	#if {red::*} contain {_p}:
+	#	set id based score "&5Your team: &cRed" in sidebar of {_p} to -1 with id "team.%{_p}%"
+	#else:
+	#	set id based score "&5Your team: &9Blue" in sidebar of {_p} to -1 with id "team.%{_p}%"
+	set id based score "&dMAP: &b%proper_case({last_map})%" in sidebar of {_p} to -2 with id "map"
+	#set id based score "&eKit: &6%proper_case({kit.%{_p}%})%" in sidebar of {_p} to -3 with id "kit.%{_p}%"

@@ -212,7 +212,8 @@ function reset():
 	delete {join::*}
 	command "/scoreboard teams remove red"
 	command "/scoreboard teams remove blue"
-	map_create()
+	async:
+		map_create()
 	if {auto_start} is true:
 		broadcast "&630秒後に試合を開始します！"
 		wait 30 seconds
