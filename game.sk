@@ -129,6 +129,18 @@ on rightclick holding chest:
 	name of held item contain "Select Kit"
 	command "/select_kit %player%"
 
+#職業チェンジのポータル
+on portal:
+	"%event-teleport cause%" is "nether portal" #ネザーかの判定
+	player's world is "game"
+	cancel event
+	if {red::*} contain player:
+		teleport player to {map_setting::spawn::red::1}
+	if {blue::*} contain player:
+		teleport player to {map_setting::spawn::blue::1}
+	wait 10 tick
+	command "/select_kit %player%"
+
 function timeup():
 	#レッドが勝っていたら
 	if {max_count_red} < {max_count_blue}:
