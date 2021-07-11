@@ -129,7 +129,7 @@ on rightclick holding chest:
 	name of held item contain "Select Kit"
 	command "/select_kit %player%"
 
-#職業チェンジのポータル
+#KITチェンジのポータル
 on portal:
 	"%event-teleport cause%" is "nether portal" #ネザーかの判定
 	player's world is "game"
