@@ -35,8 +35,8 @@ on right click with gold hoe:
   loop living entities in radius 1.5 of {_loc}:
    loop-entity is not "%player%"
    if {red::*} contains player:
-	{blue::*} contain loop-entity
+    {blue::*} contain loop-entity
    if {blue::*} contains player:
-	{red::*} contain loop-entity
+    {red::*} contain loop-entity
    execute console command "/effect %loop-entity% clear"
    send "&a%loop-entity%のエフェクトを消した!"
