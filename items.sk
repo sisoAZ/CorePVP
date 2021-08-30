@@ -31,7 +31,7 @@ on right click with gold hoe:
   add {_z} to z-coordinate of {_loc}
   if block at {_loc} is not air or grass:
    stop
-  drawDot count 0, particle "redstone", RGB 255, 255, 255, center {_loc}, rainbowMode false, visibleRange 100, pulseDelay 0, keepFor 5 ticks
+  #drawDot count 0, particle "redstone", RGB 255, 255, 255, center {_loc}, rainbowMode false, visibleRange 100, pulseDelay 0, keepFor 5 ticks
   loop living entities in radius 1.5 of {_loc}:
    loop-entity is not "%player%"
    if {red::*} contains player:

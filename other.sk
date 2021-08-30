@@ -1,5 +1,6 @@
 on skript start:
 	reset()
+	set {first_auto_start} to true
 
 on first join:
 	wait 2 tick
@@ -132,6 +133,7 @@ on damage of villager:
 
 on damage of player:
 	if attacker's held item is axe:
+		send "&c斧で攻撃はできません！" to attacker
 		cancel event
 
 on food level change:

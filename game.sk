@@ -132,7 +132,7 @@ on rightclick holding nether star:
 	if {_team} is "blue":
 		add player to {blue::*}
 		command "/teamjoin %player% blue"
-	add arg 1 to boss bar {bartimer}
+	add player to boss bar {bartimer}
 
 on rightclick holding emerald:
 	name of held item contain "SHOP"
@@ -277,8 +277,13 @@ on join:
 		set gamemode of player to adventure
 		clear player's inventory
 		give chest named "&6Select Kit" to player
-		if {game} is true:
-			give nether star named "&6Team Join" to player
+		if {first_auto_start} is true:
+			if size of all players >= 2:
+				set {first_auto_start} to false
+				set {auto_start} to true
+				command "/start"
+				stop
+				
 
 on quit:
 	set quit message to ""
