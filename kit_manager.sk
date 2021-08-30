@@ -3,10 +3,11 @@ on script load:
 	delete {all_kits::*}
 	register_kit("attacker", "Attack", "&cとにかく攻め！！", stone sword)
 	register_kit("builder", "Builder", "&3建築で防衛してね！！", brick block)
-	register_kit("miner", "Miner", "&6金掘り奴隷と化すのだ...", diamond pickaxe)
+	register_kit("miner", "Miner", "&e&l金掘り奴隷と化すのだ...", diamond pickaxe)
+	register_kit("berserker", "Berserker", "&6ゴッドモード!?", blaze powder)
 
 options:
-	kit_cost: 300
+	kit_cost: 500
 
 command /select_kit <player>:
 	permission: siso
@@ -49,7 +50,7 @@ on inventory click:
 
 function kit_buy(p: player, kit: string, cost: number):
 	if {xp.%{_p}%} < {_cost}:
-		send "&cXPが足りません" to {_p}
+		send "&3&l%{_cost} - {xp.%{_p}%}%&cXP足りません" to {_p}
 		stop
 	if {has_kits.%{_p}%::*} contain {_kit}:
 		send "&c既に%{_kit}%&cは解放しています" to {_p}

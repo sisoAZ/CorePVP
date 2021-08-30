@@ -54,13 +54,13 @@ on respawn:
 
 on walking on emerald block:
 	{ending} is not true
-	if location of block is {map_setting::core::red}:
-		if player has nether star:
+	if player has nether star:
+		addxp(player, 50)
+		if location of block is {map_setting::core::red}:
 			if {blue::*} contain player:
 				broadcast "&9%player%&6&lがタッチダウンした！！"
 				win("blue")
-	if location of block is {map_setting::core::blue}:
-		if player has nether star:
+		if location of block is {map_setting::core::blue}:
 			if {red::*} contain player:
 				broadcast "&c%player%&6&lがタッチダウンした！！"
 				win("red")
@@ -171,6 +171,7 @@ function count_detection(p: player):
 			wait 1 tick
 
 function count_scoreboard(p: player):
+	wipe {_p}'s sidebar
 	set name of sidebar of {_p} to "&6&l戦況"
 	set id based score "&c&lRed Count" in sidebar of {_p} to {max_count_red} with id "count_red"
 	set id based score "&9&lBlue Count" in sidebar of {_p} to {max_count_blue} with id "count_blue"

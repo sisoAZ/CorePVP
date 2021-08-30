@@ -16,6 +16,8 @@ command /kit_item <player> <text>:
 			give 64 of random item of {_blocks::*} to arg 1
 		if arg 2 is "miner":
 			set slot 0 of arg 1's inventory to wooden sword
+		if arg 2 is "berserker":
+			give blaze powder named "&6GOD MODE" to arg 1
 		command "/give_tools %arg 1%"
 
 #Miner
@@ -28,6 +30,26 @@ on mine:
 		cancel event
 		if {kit.%player%} is "miner":
 			give gold ingot to player
+
+#Berserker
+on rightclick holding blaze powder:
+	{kit.%player%} is "berserker"
+	if {cooltime.%player%} >= 0:
+		stop
+	cooltime(player, 40)
+	set {%player%.godmode} to true
+	set player's max health to 4
+	add "{Attributes:[{Name:""generic.knockbackResistance"",Base:1d}]}" to nbt of player
+	wait 10 seconds
+	set {%player%.godmode} to false
+	reset player's max health
+	add "{Attributes:[{Name:""generic.knockbackResistance"",Base:0d}]}" to nbt of player
+	
+on damage of player:
+	if {%attacker%.godmode} is true:
+		increase the damage by 0.1
+		set maximum damage delay of victim to 0 seconds
+		
 
 function hostile_team(p: player) :: players:
 	if {red::*} contain {_p}:

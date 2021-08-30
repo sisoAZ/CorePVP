@@ -1,6 +1,7 @@
 on skript start:
-	reset()
 	set {first_auto_start} to true
+	set {auto_start} to false
+	reset()
 
 on first join:
 	wait 2 tick
@@ -18,6 +19,8 @@ command /status_reset <player>:
 		set {xp.%arg 1%} to 0
 		set {first_join.%arg 1%} to floor(unix timestamp of now)
 		set {kill.%arg 1%} to 0
+		set {lv.%arg 1%} to 1
+		set {require_next_lv_xp.%arg 1%} to 10
 		delete {has_kits.%arg 1%::*}
 		add "attacker" to {has_kits.%arg 1%::*}
 		add "builder" to {has_kits.%arg 1%::*}
@@ -94,6 +97,9 @@ function auto_team_select() :: string:
 #		dye {_helmet} blue
 
 on death of player:
+	if {game} is true:
+		addxp(attacker, 10)
+		add 1 to {kill.%attacker%}
 	wait 2 ticks
 	force player to respawn
 
@@ -103,6 +109,8 @@ on break of emerald block:
 
 on mine:
 	block is iron ore or gold ore
+	if {game} is true:
+		addxp(player, 1)
 	if block is iron ore:
 		cancel event
 		give iron ingot to player
@@ -224,3 +232,17 @@ function replace_tool(p: player, item: item):
 	loop 40 times:
 		if type of slot loop-number - 1 of {_p}'s inventory is {_replace_item}:
 			set slot loop-number - 1 of {_p}'s inventory to {_item}
+
+function addxp(p: player, xp: number):
+	add {_xp} to {xp.%{_p}%}
+	send "&a+%{_xp}%xp" to {_p}
+	next_lv_up_calculation({_p})
+
+function next_lv_up_calculation(p: player):
+	while {xp.%{_p}%} >= {require_next_lv_xp.%{_p}%}:
+		add 1 to {lv.%{_p}%}
+		send subtitle "   &e&lLevelUP &3&l-> &a&l%{lv.%{_p}%}%" to all players for 1 second
+		sound({_p}, "entity.player.levelup", 0)
+		set {_old_require} to {require_next_lv_xp.%{_p}%}
+		set {require_next_lv_xp.%{_p}%} to (({_old_require} * 1.1) + ({lv.%{_p}%} * 15)) / 2
+		wait 5 ticks

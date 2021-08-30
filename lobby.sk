@@ -1,0 +1,8 @@
+function lobby_scoreboard(p: player):
+	wipe {_p}'s sidebar
+	set name of sidebar of {_p} to "&6&lCore PVP"
+	set score "" in sidebar of {_p} to 1
+	set score "&bLv: %{lv.%{_p}%}%" in sidebar of {_p} to 2
+	set score "&cKill: %{kill.%{_p}%}%" in sidebar of {_p} to 3
+	set score "&aXP: %{xp.%{_p}%}%" in sidebar of {_p} to 4
+	set score "&9&l===Your Status===" in sidebar of {_p} to 5

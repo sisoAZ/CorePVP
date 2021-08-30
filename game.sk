@@ -46,10 +46,10 @@ on death of player:
 
 on respawn:
 	wait a tick
-	send subtitle "&3&lリスポーン中..." to player for 4 seconds
+	send subtitle "&3&lリスポーン中..." to player for 5 seconds
 	teleport player to block 30 meters above {map_setting::spawn_core}
 	set gamemode of player to spectator
-	wait 4 seconds
+	wait 5 seconds
 	set gamemode of player to survival
 	command "/respawn %player%"
 
@@ -193,8 +193,12 @@ function win(color: text):
 		sound(loop-player, "entity.player.levelup")
 	if {_color} is "red":
 		send title "&c&lRED &a&lWIN!!" to all players for 3 seconds
+		loop {red::*}:
+			addxp(loop-value, 100)
 	if {_color} is "blue":
 		send title "&9&lBLUE &a&lWIN!!" to all players for 3 seconds
+		loop {blue::*}:
+			addxp(loop-value, 100)
 	wait 4 seconds
 	reset()
 
@@ -231,6 +235,7 @@ function reset():
 		give chest named "&6Select Kit" to loop-player
 		set slot 8 of loop-player's inventory to type of writable book
 		wipe loop-player's sidebar
+		lobby_scoreboard(loop-player)
 	command "/effect @a clear"
 	delete {red::*}
 	delete {blue::*}
@@ -271,18 +276,19 @@ on join:
 			clear player's inventory
 			give chest named "&6Select Kit" to player
 			give nether star named "&6Team join" to player
+			lobby_scoreboard(player)
 	else:
 		wait 2 ticks
 		teleport player to {lobby}
 		set gamemode of player to adventure
 		clear player's inventory
 		give chest named "&6Select Kit" to player
+		lobby_scoreboard(player)
 		if {first_auto_start} is true:
 			if size of all players >= 2:
 				set {first_auto_start} to false
 				set {auto_start} to true
 				command "/start"
-				stop
 				
 
 on quit:
