@@ -1,0 +1,20 @@
+function shop_enchanter(p: player):
+	open chest with 1 row named "&9Enchanter SHOP" to {_p}
+	set slot 4 of {_p}'s current inventory to experience bottle named "&e&lGet Level 30" with lore "&6Gold: 10"
+
+on inventory click:
+	name of player's current inventory contain "&9Enchanter SHOP"
+	clicked item is not air
+	cancel event
+	set {_split_gold::*} to line 1 of lore of clicked item split at "&6Gold: "
+	set {_gold} to {_split_gold::2} parsed as number
+	if number of all gold ingot in player's inventory < {_gold}:
+		send "&cGoldが足りません"
+		stop
+	remove {_gold} of gold ingot from player's inventory
+	add 30 to player's level
+	stop
+
+on rightclick holding book:
+    name of held item contain "Enchanter SHOP"
+    shop_enchanter(player)

@@ -158,6 +158,82 @@ on chat:
 	if {blue::*} contain player:
 		set chat format to "&9%player's name%&r: %colored message%"
 
+#エンチャントの仕様
+on inventory open:
+	if name of event-inventory is "Enchant":
+		set slot 1 of event-inventory to 64 lapis lazulis
+
+on inventory click:
+	if name of event-inventory is "Enchant":
+		if clicked slot is 1:
+			cancel event
+
+on inventory close:
+	if name of event-inventory is "Enchant":
+		set slot 1 of event-inventory to air
+
+on enchant:
+	wait 1 tick
+	if enchant level <= 10:
+		add 1 to level of player
+	if enchant level <= 20:
+		add 2 to level of player
+	if enchant level <= 30:
+		add 3 to level of player
+	remove enchant level from level of player
+
+#醸造台の仕様
+on inventory click:
+	inventory type of event-inventory is "BREWING"
+	if clicked slot is 3:
+		wait 1 tick
+		if slot 3 of event-inventory is not air:
+			slot 0 or 1 or 2 of event-inventory is not air
+			set {_inv} to event-inventory
+			set {_holder} to method "getHolder" from event-inventory
+			set {_block} to method "getBlock" from {_holder}
+			set block at {brew_loc} to {_block}
+			wait 1 tick
+			add "{BrewTime:300s}" to nbt of {_block}
+
+#醸造台を置いた瞬間に水とブレイズパウダーをセット
+on place:
+	"%event-block%" is "BREWING_STAND"
+	set slot 4 of inventory of event-block to 64 blaze powder
+	set slot 0 of inventory of event-block to water bottle
+	set slot 1 of inventory of event-block to water bottle
+	set slot 2 of inventory of event-block to water bottle
+
+on inventory click:
+	if name of event-inventory is "container.brewing":
+		if clicked slot is 4:
+			cancel event
+
+#壊したときブレイズパウダーが出るので対策
+on break:
+	"%event-block%" is "BREWING_STAND"
+	set slot 4 of event-block's inventory to air
+	if slot 0 of event-block's inventory is water bottle:
+		set slot 0 of event-block's inventory to air
+	if slot 1 of event-block's inventory is water bottle:
+		set slot 1 of event-block's inventory to air
+	if slot 2 of event-block's inventory is water bottle:
+		set slot 2 of event-block's inventory to air
+
+#醸造アイテムを入れたらゲージが7割完了する
+on inventory click:
+	inventory type of event-inventory is "BREWING"
+	if clicked slot is 3:
+		wait 1 tick
+		if slot 3 of event-inventory is not air:
+			slot 0 or 1 or 2 of event-inventory is not air
+			set {_inv} to event-inventory
+			set {_holder} to method "getHolder" from event-inventory
+			set {_block} to method "getBlock" from {_holder}
+			set block at {brew_loc} to {_block}
+			wait 1 tick
+			add "{BrewTime:100s}" to nbt of {_block}
+
 function sound(p: player, sound: text, pitch: number = 1):
 	play sound {_sound} with volume 1 and pitch {_pitch} at {_p} for {_p}
 

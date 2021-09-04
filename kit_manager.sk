@@ -5,6 +5,8 @@ on script load:
 	register_kit("builder", "Builder", "&3建築で防衛してね！！", brick block)
 	register_kit("miner", "Miner", "&e&l金掘り奴隷と化すのだ...", diamond pickaxe)
 	register_kit("berserker", "Berserker", "&6ゴッドモード!?", blaze powder)
+	register_kit("alchemist", "Alchemist", "&dポーションで一気に攻めよう！", brewing stand)
+	register_kit("enchanter", "Enchanter", "&9己を磨こう。", experience bottle)
 
 options:
 	kit_cost: 500

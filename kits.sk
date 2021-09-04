@@ -4,21 +4,25 @@ command /kit_item <player> <text>:
 		if {cooltime.%arg 1%} <= 15:
 			set {cooltime.%arg 1%} to -1
 		equip(arg 1)
+		set slot 0 of arg 1's inventory to wooden sword
+		command "/give_tools %arg 1%"
 		if arg 2 is "attacker":
 			set slot 0 of arg 1's inventory to stone sword
 			set chestplate of arg 1 to chainmail chestplate
 		if arg 2 is "builder":
-			set slot 0 of arg 1's inventory to wooden sword
 			add wool to {_blocks::*}
 			add brick block to {_blocks::*}
 			add log to {_blocks::*}
 			add end stone to {_blocks::*}
 			give 64 of random item of {_blocks::*} to arg 1
 		if arg 2 is "miner":
-			set slot 0 of arg 1's inventory to wooden sword
+			true is true#なにもしない
 		if arg 2 is "berserker":
 			give blaze powder named "&6GOD MODE" to arg 1
-		command "/give_tools %arg 1%"
+		if arg 2 is "alchemist":
+			give book named "&5Alchemist SHOP" to arg 1
+		if arg 2 is "enchanter":
+			give book named "&9Enchanter SHOP" to arg 1
 
 #Miner
 on mine:
@@ -49,7 +53,6 @@ on damage of player:
 	if {%attacker%.godmode} is true:
 		increase the damage by 0.1
 		set maximum damage delay of victim to 0 seconds
-		
 
 function hostile_team(p: player) :: players:
 	if {red::*} contain {_p}:

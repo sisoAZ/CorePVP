@@ -1,0 +1,36 @@
+#醸造台の素材
+function shop_brewing(p: player):
+	open chest with 2 row named "&eBrewing SHOP" to {_p}
+	set slot 0 of {_p}'s current inventory to brewing stand named "&ePrivate Brewing Stand" with lore "&6Gold: 10"
+	set slot 1 of {_p}'s current inventory to 3 water bottle named "&eBottle" with lore "&6Gold: 1"
+	set slot 2 of {_p}'s current inventory to nether wart item named "&eNether wart" with lore "&6Gold: 2"
+	set slot 3 of {_p}'s current inventory to redstone named "&eRedstone" with lore "&6Gold: 3"
+	set slot 4 of {_p}'s current inventory to gunpowder named "&eGunPowder" with lore "&6Gold: 1"
+	set slot 5 of {_p}'s current inventory to glowstone dust named "&eGlowStone Dust" with lore "&6Gold: 1"
+	set slot 6 of {_p}'s current inventory to fermented spider eye named "&eFermented spider eye" with lore "&6Gold: 2"
+	set slot 7 of {_p}'s current inventory to magma cream named "&eMagma cream" with lore "&6Gold: 2"
+	set slot 8 of {_p}'s current inventory to sugar named "&eSugar" with lore "&6Gold: 2"
+	set slot 9 of {_p}'s current inventory to spider eye named "&eSpider eye" with lore "&6Gold: 2"
+	set slot 10 of {_p}'s current inventory to golden carrot named "&eGold currot" with lore "&6Gold: 2"
+	set slot 11 of {_p}'s current inventory to gold melon named "&eGold melon" with lore "&6Gold: 2"
+	set slot 12 of {_p}'s current inventory to ghast tear named "&eGhast tear" with lore "&6Gold: 10"
+	set slot 13 of {_p}'s current inventory to blaze powder named "&eBlaze Powder" with lore "&6Gold: 15"
+
+on inventory click:
+	name of player's current inventory contain "Brewing SHOP"
+	clicked item is not air
+	cancel event
+	set {_split_gold::*} to line 1 of lore of clicked item split at "&6Gold: "
+	set {_gold} to {_split_gold::2} parsed as number
+	if number of all gold ingot in player's inventory < {_gold}:
+		send "&cGoldが足りません"
+		stop
+	set {_item} to clicked item
+	clear lore of {_item}
+	give {_item} to player
+	remove {_gold} of gold ingot from player's inventory
+	stop
+
+on rightclick holding book:
+    name of held item contain "Alchemist SHOP"
+    shop_brewing(player)
