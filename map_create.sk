@@ -22,9 +22,12 @@ function map_create():
 	set {map_setting::spawn_core} to move_location_world({world_setting::%{_new_map}%::spawn_core}, "game")
 	set {map_setting::core::red} to move_location_world({world_setting::%{_new_map}%::red::core}, "game")
 	set {map_setting::core::blue} to move_location_world({world_setting::%{_new_map}%::blue::core}, "game")
+	delete {map_setting::spawn::red::*}
+	delete {map_setting::spawn::blue::*}
 	loop size of {world_setting::%{_new_map}%::red::spawn::*} times:
 		set {map_setting::spawn::red::%loop-number%} to move_location_world({world_setting::%{_new_map}%::red::spawn::%loop-number%}, "game")
 		set {map_setting::spawn::blue::%loop-number%} to move_location_world({world_setting::%{_new_map}%::blue::spawn::%loop-number%}, "game")
+	delete {world_setting::%{_new_map}%::shops::*}
 	loop size of {world_setting::%{_new_map}%::shops::*} times:
 		set {_spawn_location} to move_location_world({world_setting::%{_new_map}%::shops::%loop-number%}, "game")
 		set {_chunk} to chunk of {_spawn_location}

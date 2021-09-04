@@ -1,5 +1,9 @@
 on skript start:
 	set {first_auto_start} to true
+	if {hide_owner} is true:
+		set {first_auto_start_players} to 3
+	else:
+		set {first_auto_start_players} to 2
 	set {auto_start} to false
 	reset()
 
@@ -317,7 +321,7 @@ function addxp(p: player, xp: number):
 function next_lv_up_calculation(p: player):
 	while {xp.%{_p}%} >= {require_next_lv_xp.%{_p}%}:
 		add 1 to {lv.%{_p}%}
-		send subtitle "   &e&lLevelUP &3&l-> &a&l%{lv.%{_p}%}%" to all players for 1 second
+		send subtitle "   &e&lLevelUP &3&l-> &a&l%{lv.%{_p}%}%" to {_p} for 1 second
 		sound({_p}, "entity.player.levelup", 0)
 		set {_old_require} to {require_next_lv_xp.%{_p}%}
 		set {require_next_lv_xp.%{_p}%} to (({_old_require} * 1.1) + ({lv.%{_p}%} * 15)) / 2

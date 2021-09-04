@@ -24,8 +24,11 @@ command /settings [<text>] [<text>] [<text>] [<text>]:
 					add "%player's world%" to {maplist::*}
 					set {mapname.%player's world%} to arg 3
 					execute player command "/mv modify set autoload true"
-					execute player command "/mv modify monsters false"
+					execute player command "/mv modify set monsters false"
+					execute player command "/mv modify set gamemode 0"
+					execute player command "/mv gamerule keepInventory true"
 					execute player command "/mv config autopurge false"
+					
 					send "&a完了しました。 MAP名(%arg 3%)"
 					stop
 				else:

@@ -8,6 +8,8 @@ command /start:
 		if {game} is true:	
 			send "&cゲームはすでに開始されています" to ops
 			stop
+		if {first_auto_start} is true:
+			set {first_auto_start} to false
 		set {game} to true
 		broadcast "&aゲームを開始します"
 		command "/gamemode 0 @a"
@@ -101,8 +103,6 @@ function random_team():
 		add {_random_player} to {red::*}
 		remove {_random_player} from {_allplayers::*}
 	set {blue::*} to {_allplayers::*}
-	broadcast "DEBUG %{red::*}%"
-	broadcast "DEBUG %{blue::*}%"
 
 function register_scoreborad():
 	command "/scoreboard teams add red"
@@ -285,11 +285,10 @@ on join:
 		give chest named "&6Select Kit" to player
 		lobby_scoreboard(player)
 		if {first_auto_start} is true:
-			if size of all players >= 2:
+			if size of all players >= {first_auto_start_players}:
 				set {first_auto_start} to false
 				set {auto_start} to true
 				command "/start"
-				
 
 on quit:
 	set quit message to ""
